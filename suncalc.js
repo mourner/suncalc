@@ -116,7 +116,7 @@
 			
 		function getSunsetJ(h) { 
 			var w = getHourAngle(h, phi, d),
-				approx = getApproxSolarTransit(w, lw, n);
+			    approx = getApproxSolarTransit(w, lw, n);
 			return getSolarTransit(approx, M, Lsun); 
 		}
 		
