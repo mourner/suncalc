@@ -166,4 +166,6 @@
 			altitude: getAltitude(th, a, phi, d)
 		};
 	};
+	
+	SunCalc.rad2deg = 1 / deg2rad;
 }(this));
