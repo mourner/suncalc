@@ -1,0 +1,8 @@
+/*
+ Copyright (c) 2011, Vladimir Agafonkin
+ SunCalc is an Open Source JavaScript library for calculating sun position and sunlight phases for the given location and time.
+ See https://github.com/mourner/suncalc for source code and more information.
+*/
+(function(l){function h(a){return new Date((a+0.5-m)*n)}function u(b){return o*a.sin(b)+p*a.sin(2*b)+q*a.sin(3*b)}var i={};typeof module!=="undefined"&&module.exports?module.exports=i:l.SunCalc=i;var a=Math,m=2440588,j=2451545,c=a.PI/180,n=864E5,v=357.5291*c,w=0.98560028*c,r=9.0E-4,x=0.0053,y=-0.0069,o=1.9148*c,p=0.02*c,q=3.0E-4*c,z=102.9372*c,s=23.45*c,H=280.16*c,I=360.9856235*c,J=0.53*c,A=-0.83*c,K=-6*c,L=-12*c,M=-18*c;i.getTimes=function(b,d,e){function f(b){b=a.acos((a.sin(b)-a.sin(i)*a.sin(B))/
+(a.cos(i)*a.cos(B)));return j+r+(b+g)/(2*a.PI)+C+x*a.sin(k)+y*a.sin(2*t)}var g=-e*c,i=d*c,C=a.round(b.valueOf()/n-0.5+m-j-r-g/(2*a.PI)),b=j+r+(0+g)/(2*a.PI)+C,k=v+w*(b-j),d=u(k),t=k+z+d+a.PI,B=a.asin(a.sin(t)*a.sin(s)),b=b+x*a.sin(k)+y*a.sin(2*t),d=f(A),e=b-(d-b),D=f(A+J),l=b-(D-b),E=f(K),o=b-(E-b),F=f(L),p=b-(F-b),G=f(M),q=b-(G-b);return{sunrise:h(e),sunriseEnd:h(l),solarNoon:h(b),sunsetStart:h(D),sunset:h(d),dusk:h(E),nauticalDusk:h(F),night:h(G),nightEnd:h(q),nauticalDawn:h(p),dawn:h(o)}};i.getSunPosition=
+function(b,d,e){e=-e*c;d*=c;var f=b.valueOf()/n-0.5+m,b=v+w*(f-j),g=u(b),g=b+z+g+a.PI,b=a.asin(a.sin(g)*a.sin(s)),g=a.atan2(a.sin(g)*a.cos(s),a.cos(g)),f=H+I*(f-j)-e,e=f-g,e=a.atan2(a.sin(e),a.cos(e)*a.sin(d)-a.tan(b)*a.cos(d));f-=g;d=a.asin(a.sin(d)*a.sin(b)+a.cos(d)*a.cos(b)*a.cos(f));return{azimuth:e,altitude:d}};i.rad2deg=1/c})(this);
