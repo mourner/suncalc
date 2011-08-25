@@ -35,11 +35,11 @@
 	    th0 = 280.1600 * deg2rad,
 	    th1 = 360.9856235 * deg2rad,
 		
-	    d0 = 0.53 * deg2rad, 	// sun angular diameter
-	    h0 = -0.83 * deg2rad, 	// sunset/sunrise angle
-	    h1 = -6 * deg2rad, 		// civil dusk/dawn angle
-	    h2 = -12 * deg2rad, 	// nautical dusk/dawn angle
-	    h3 = -18 * deg2rad;		// night angle
+	    d0 = 0.53 * deg2rad,
+	    h0 = -0.83 * deg2rad,
+	    h1 = -6 * deg2rad,
+	    h2 = -12 * deg2rad,
+	    h3 = -18 * deg2rad;
 
 	function dateToJulianDate(date) { 
 		return date.valueOf() / msInDay - 0.5 + J1970; 
@@ -128,25 +128,25 @@
 		    Jrise = getSunriseJ(Jset),
 		    Jsetstart = getSunsetJ(h0 + d0),
 		    Jriseend = getSunriseJ(Jsetstart),
-			Jnau = getSunsetJ(h1),
-		    Jciv2 = getSunriseJ(Jnau),
-		    Jastro = getSunsetJ(h2),
-		    Jnau2 = getSunriseJ(Jastro),
+		    Jdusk = getSunsetJ(h1),
+		    Jdawn = getSunriseJ(Jdusk),
+		    Jndusk = getSunsetJ(h2),
+		    Jndawn = getSunriseJ(Jndusk),
 		    Jnight = getSunsetJ(h3),
-		    Jastro2 = getSunriseJ(Jnight);
+		    Jnightend = getSunriseJ(Jnight);
 		
 		return {
-			sunrise: julianDateToDate(Jrise),		// sunrise (top edge of the sun appears on the horizon)
-			sunriseEnd: julianDateToDate(Jriseend),	// sunrise ends (bottom edge of the sun touches the horizon)
-			solarNoon: julianDateToDate(Jtransit),	// solar noon (sun is in the highest position)
-			sunsetStart: julianDateToDate(Jsetstart), // sunset starts (bottom edge of the sun touches the horizon)
-			sunset: julianDateToDate(Jset),			// sunset (sun disappears below the horizon, evening civil twilight starts)
-			dusk: julianDateToDate(Jnau),			// dusk (evening nautical twilight starts)
-			nauticalDusk: julianDateToDate(Jastro),	// nautical dusk (evening astronomical twilight starts)
-			night: julianDateToDate(Jnight),		// night starts (dark enough for astronomical observations)
-			nightEnd: julianDateToDate(Jastro2),	// night ends (morning astronomical twilight starts)
-			nauticalDawn: julianDateToDate(Jnau2),	// nautical dawn (morning nautical twilight starts)
-			dawn: julianDateToDate(Jciv2)			// dawn (morning nautical twilight ends, morning civil twilight starts)
+			sunrise: julianDateToDate(Jrise),
+			sunriseEnd: julianDateToDate(Jriseend),
+			solarNoon: julianDateToDate(Jtransit),
+			sunsetStart: julianDateToDate(Jsetstart),
+			sunset: julianDateToDate(Jset),
+			dusk: julianDateToDate(Jdusk),
+			nauticalDusk: julianDateToDate(Jndusk),
+			night: julianDateToDate(Jnight),
+			nightEnd: julianDateToDate(Jnightend),
+			nauticalDawn: julianDateToDate(Jndawn),
+			dawn: julianDateToDate(Jdawn)
 		};
 	};
 		
