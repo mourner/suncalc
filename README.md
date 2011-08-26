@@ -30,8 +30,10 @@ SunCalc.getTimes(/*Date*/ date, /*Number*/ latitude, /*Number*/ longitude)
 Returns an object with the following properties (each is a `Date` object):
 
  * `sunrise`: sunrise (top edge of the sun appears on the horizon)
- * `sunriseStart`: sunrise ends (bottom edge of the sun touches the horizon)
+ * `sunriseEnd`: sunrise ends (bottom edge of the sun touches the horizon)
+ * `goldenHourEnd`: morning golden hour (soft light, best time for photography) ends
  * `solarNoon`: solar noon (sun is in the highest position)
+ * `goldenHour`: evening golden hour starts
  * `sunsetStart`: sunset starts (bottom edge of the sun touches the horizon)
  * `sunset`: sunset (sun disappears below the horizon, evening civil twilight starts)
  * `dusk`: dusk (evening nautical twilight starts)
@@ -49,8 +51,14 @@ Returns an object with the following properties:
 
  * `altitude`: sun altitude above the horizon in radians, e.g. `0` at the horizon and `PI/2` at the zenith (straight over your head)
  * `azimuth`: sun azimuth in radians (direction along the horizon, measured from south to west), e.g. `0` is south and `Math.PI * 3/4` is northwest
- 
+
+```javascript
+SunCalc.addTime(/*Number*/ angleInDegrees, /*String*/ morningName, /*String*/ eveningName)
 ```
+
+Adds a custom time when the sun reaches the given angle to results returned by `SunCalc.getTimes`. 
+
+```javascript
 SunCalc.rad2deg
 ```
 
