@@ -105,10 +105,6 @@
 				(m.cos(phi) * m.cos(d))); 
 	}
 	
-	SunCalc.addTime = function (angle, riseName, setName) {
-		times.push([angle, riseName, setName]);
-	};
-	
 	SunCalc.getTimes = function (date, lat, lng) {
 		var lw = -lng * deg2rad,
 		    phi = lat * deg2rad,
@@ -132,7 +128,7 @@
 		}
 			
 		var result = {solarNoon: julianDateToDate(Jtransit)},
-			i, len, time, Jset, Jrise;
+		    i, len, time, Jset, Jrise;
 		
 		for (i = 0, len = times.length; i < len; i++) {
 			time = times[i];
@@ -161,6 +157,10 @@
 			azimuth: getAzimuth(th, a, phi, d),
 			altitude: getAltitude(th, a, phi, d)
 		};
+	};
+	
+	SunCalc.addTime = function (angle, riseName, setName) {
+		times.push([angle, riseName, setName]);
 	};
 	
 	SunCalc.rad2deg = 1 / deg2rad;
