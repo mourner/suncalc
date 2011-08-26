@@ -17,6 +17,15 @@
 		global.SunCalc = SunCalc;
 	}
 	
+	var times = [
+		[-0.83, 'sunrise', 'sunset'],
+		[ -0.3, 'sunriseEnd', 'sunsetStart'],
+		[   -6, 'dawn', 'dusk'],
+		[  -12, 'nauticalDawn', 'nauticalDusk'],
+		[  -18, 'night', 'nightEnd'],
+		[    6, 'goldenHourEnd', 'goldenHour']
+	];
+	
 	var m = Math,
 	    J1970 = 2440588,
 	    J2000 = 2451545,
@@ -33,13 +42,7 @@
 	    P = 102.9372 * deg2rad,
 	    e = 23.45 * deg2rad,
 	    th0 = 280.1600 * deg2rad,
-	    th1 = 360.9856235 * deg2rad,
-		
-	    d0 = 0.53 * deg2rad,
-	    h0 = -0.83 * deg2rad,
-	    h1 = -6 * deg2rad,
-	    h2 = -12 * deg2rad,
-	    h3 = -18 * deg2rad;
+	    th1 = 360.9856235 * deg2rad;
 
 	function dateToJulianDate(date) { 
 		return date.valueOf() / msInDay - 0.5 + J1970; 
@@ -102,6 +105,10 @@
 				(m.cos(phi) * m.cos(d))); 
 	}
 	
+	SunCalc.addTime = function (angle, riseName, setName) {
+		times.push([angle, riseName, setName]);
+	};
+	
 	SunCalc.getTimes = function (date, lat, lng) {
 		var lw = -lng * deg2rad,
 		    phi = lat * deg2rad,
@@ -124,30 +131,19 @@
 			return Jtransit - (Jset - Jtransit); 
 		}
 			
-		var Jset = getSunsetJ(h0),
-		    Jrise = getSunriseJ(Jset),
-		    Jsetstart = getSunsetJ(h0 + d0),
-		    Jriseend = getSunriseJ(Jsetstart),
-		    Jdusk = getSunsetJ(h1),
-		    Jdawn = getSunriseJ(Jdusk),
-		    Jndusk = getSunsetJ(h2),
-		    Jndawn = getSunriseJ(Jndusk),
-		    Jnight = getSunsetJ(h3),
-		    Jnightend = getSunriseJ(Jnight);
+		var result = {solarNoon: julianDateToDate(Jtransit)},
+			i, len, time, Jset, Jrise;
 		
-		return {
-			sunrise: julianDateToDate(Jrise),
-			sunriseEnd: julianDateToDate(Jriseend),
-			solarNoon: julianDateToDate(Jtransit),
-			sunsetStart: julianDateToDate(Jsetstart),
-			sunset: julianDateToDate(Jset),
-			dusk: julianDateToDate(Jdusk),
-			nauticalDusk: julianDateToDate(Jndusk),
-			night: julianDateToDate(Jnight),
-			nightEnd: julianDateToDate(Jnightend),
-			nauticalDawn: julianDateToDate(Jndawn),
-			dawn: julianDateToDate(Jdawn)
-		};
+		for (i = 0, len = times.length; i < len; i++) {
+			time = times[i];
+			Jset = getSunsetJ(time[0] * deg2rad);
+			Jrise = getSunriseJ(Jset);
+			
+			result[time[1]] = julianDateToDate(Jrise);
+			result[time[2]] = julianDateToDate(Jset);
+		}
+		
+		return result;
 	};
 		
 	SunCalc.getSunPosition = function (date, lat, lng) {
