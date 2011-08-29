@@ -128,9 +128,13 @@
 		}
 			
 		var result = {solarNoon: julianDateToDate(Jtransit)},
-		    i, len, time, Jset, Jrise;
+			len = times.length, 
+		    i, 
+			time, 
+			Jset, 
+			Jrise;
 		
-		for (i = 0, len = times.length; i < len; i++) {
+		for (i = 0; i < len; i += 1) {
 			time = times[i];
 			Jset = getSunsetJ(time[0] * deg2rad);
 			Jrise = getSunriseJ(Jset);
