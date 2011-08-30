@@ -44,11 +44,11 @@ getAltitude           = (h, phi, d) -> asin(sin(phi) * sin(d) + cos(phi) * cos(d
 
 
 times = [[-0.83, 'sunrise',       'sunset']
-	     [ -0.3, 'sunriseEnd',    'sunsetStart']
-	     [   -6, 'dawn',          'dusk']
-	     [  -12, 'nauticalDawn',  'nauticalDusk']
-	     [  -18, 'night',         'nightEnd']
-	     [    6, 'goldenHourEnd', 'goldenHour']]
+         [ -0.3, 'sunriseEnd',    'sunsetStart']
+         [   -6, 'dawn',          'dusk']
+         [  -12, 'nauticalDawn',  'nauticalDusk']
+         [  -18, 'night',         'nightEnd']
+         [    6, 'goldenHourEnd', 'goldenHour']]
 
 SunCalc.addTime = (angle, morningName, eveningName) -> 
 	times.push [angle, morningName, eveningName]
@@ -68,7 +68,7 @@ SunCalc.getTimes = (date, lat, lng) ->
 	result = {solarNoon: julianDateToDate Jnoon}
 	
 	for [angle, morningName, eveningName] in times
-	    h    = angle * deg2rad
+		h    = angle * deg2rad
 		w    = getHourAngle          h, phi, d
 		a    = getApproxSolarTransit w, lw, n
 		Jset = getSolarTransit       a, M, Ls
