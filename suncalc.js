@@ -50,34 +50,31 @@
 	// date conversions
 	
 	function dateToJulianDate(date) { return date.valueOf() / dayMs - 0.5 + J1970; }
-	function julianDateToDate(j)    { return new Date((j + 0.5 - J1970) * dayMs);  }
+	function julianDateToDate(j) { return new Date((j + 0.5 - J1970) * dayMs); }
 	
 	
 	// general sun calculations
 	
-	function getJulianCycle(J, lw)      { return m.round(J - J2000 - J0 - lw / (2 * m.PI)); }
-	function getSolarMeanAnomaly(Js)    { return M0 + M1 * (Js - J2000);                    }
-	function getEquationOfCenter(M)     { return C1 * sin(M) + C2 * sin(2 * M) + 
-	                                                           C3 * sin(3 * M);             }
-	function getEclipticLongitude(M, C) { return M + P + C + m.PI;                          }
-	function getSunDeclination(Ls)      { return m.asin(sin(Ls) * sin(e));                  }
+	function getJulianCycle(J, lw) { return m.round(J - J2000 - J0 - lw / (2 * m.PI)); }
+	function getSolarMeanAnomaly(Js) { return M0 + M1 * (Js - J2000); }
+	function getEquationOfCenter(M) { return C1 * sin(M) + C2 * sin(2 * M) + C3 * sin(3 * M); }
+	function getEclipticLongitude(M, C) { return M + P + C + m.PI; }
+	function getSunDeclination(Ls) { return m.asin(sin(Ls) * sin(e)); }
 	
 	
 	// calculations for sun times
 	
 	function getApproxTransit(Ht, lw, n) { return J2000 + J0 + (Ht + lw) / (2 * m.PI) + n; }
-	function getSolarTransit(Js, M, Ls)  { return Js + (J1 * sin(M)) + (J2 * sin(2 * Ls)); }
-	function getHourAngle(h, phi, d)     { return m.acos((sin(h) - sin(phi) * sin(d)) / 
-	                                                     (cos(phi) * cos(d)));             }
+	function getSolarTransit(Js, M, Ls) { return Js + (J1 * sin(M)) + (J2 * sin(2 * Ls)); }
+	function getHourAngle(h, phi, d) { return m.acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d))); }
+	
 	
 	// calculations for sun position
 	
 	function getRightAscension(Ls)  { return m.atan2(sin(Ls) * cos(e), cos(Ls)); }
-	function getSiderealTime(J, lw) { return th0 + th1 * (J - J2000) - lw;       }
-	function getAzimuth(H, phi, d)  { return m.atan2(sin(H), cos(H) * sin(phi) - 
-	                                                 m.tan(d) * cos(phi));       }
-	function getAltitude(H, phi, d) { return m.asin(sin(phi) * sin(d) + 
-	                                                cos(phi) * cos(d) * cos(H)); }
+	function getSiderealTime(J, lw) { return th0 + th1 * (J - J2000) - lw; }
+	function getAzimuth(H, phi, d)  { return m.atan2(sin(H), cos(H) * sin(phi) - m.tan(d) * cos(phi)); }
+	function getAltitude(H, phi, d) { return m.asin(sin(phi) * sin(d) + cos(phi) * cos(d) * cos(H)); }
 	
 	
 	// times configuration (angle, morning name, evening name)
