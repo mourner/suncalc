@@ -71,9 +71,9 @@
 	
 	// calculations for sun position
 	
-	function getRightAscension(Ls)  { return m.atan2(sin(Ls) * cos(e), cos(Ls)); }
+	function getRightAscension(Ls) { return m.atan2(sin(Ls) * cos(e), cos(Ls)); }
 	function getSiderealTime(J, lw) { return th0 + th1 * (J - J2000) - lw; }
-	function getAzimuth(H, phi, d)  { return m.atan2(sin(H), cos(H) * sin(phi) - m.tan(d) * cos(phi)); }
+	function getAzimuth(H, phi, d) { return m.atan2(sin(H), cos(H) * sin(phi) - m.tan(d) * cos(phi)); }
 	function getAltitude(H, phi, d) { return m.asin(sin(phi) * sin(d) + cos(phi) * cos(d) * cos(H)); }
 	
 	
