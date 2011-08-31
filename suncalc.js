@@ -24,7 +24,7 @@
 	
 	var m   = Math,
 	    rad = m.PI / 180,
-		sin = m.sin,
+	    sin = m.sin,
         cos = m.cos;
 		
 	
@@ -100,15 +100,15 @@
 	// calculates sun times for a given date and latitude/longitude
 	
 	SunCalc.getTimes = function (date, lat, lng) {
-		var lw  = rad * -lng,
-		    phi = rad * lat,
-		    J   = dateToJulianDate(date),
-		    n   = getJulianCycle(J, lw),
-		    Js  = getApproxTransit(0, lw, n),
-		    M   = getSolarMeanAnomaly(Js),
-		    C   = getEquationOfCenter(M),
-		    Ls  = getEclipticLongitude(M, C),
-		    d   = getSunDeclination(Ls),
+		var lw    = rad * -lng,
+		    phi   = rad * lat,
+		    J     = dateToJulianDate(date),
+		    n     = getJulianCycle(J, lw),
+		    Js    = getApproxTransit(0, lw, n),
+		    M     = getSolarMeanAnomaly(Js),
+		    C     = getEquationOfCenter(M),
+		    Ls    = getEclipticLongitude(M, C),
+		    d     = getSunDeclination(Ls),
 		    Jnoon = getSolarTransit(Js, M, Ls);
 			
 		function getSetJ(h) { 
