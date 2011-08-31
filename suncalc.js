@@ -25,7 +25,7 @@
 	var m   = Math,
 	    rad = m.PI / 180,
 	    sin = m.sin,
-        cos = m.cos;
+	    cos = m.cos;
 		
 	
 	// constants for sun calculations
@@ -100,6 +100,7 @@
 	// calculates sun times for a given date and latitude/longitude
 	
 	SunCalc.getTimes = function (date, lat, lng) {
+	
 		var lw    = rad * -lng,
 		    phi   = rad * lat,
 		    J     = dateToJulianDate(date),
@@ -114,12 +115,13 @@
 		function getSetJ(h) { 
 			var w = getHourAngle(h, phi, d),
 			    a = getApproxTransit(w, lw, n);
+			    
 			return getSolarTransit(a, M, Ls); 
 		}
 		
 		var result = {solarNoon: julianDateToDate(Jnoon)};
 		
-		var i, len, time, angle, morningName, eveningName, Jset, Jrise;
+		var i, len, time, angle, morningName, eveningName, Jset, Jrise;		
 		for (i = 0, len = times.length; i < len; i += 1) {
 			time = times[i];
 			
@@ -141,6 +143,7 @@
 	// calculates sun azimuth and altitude for a given date and latitude/longitude
 		
 	SunCalc.getPosition = function (date, lat, lng) {
+	
 		var lw  = rad * -lng,
 		    phi = rad * lat,
 		    J   = dateToJulianDate(date),
