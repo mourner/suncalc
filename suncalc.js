@@ -1,7 +1,7 @@
 /**
  * @preserve Copyright (c) 2011, Vladimir Agafonkin
- * SunCalc is an Open Source JavaScript library for calculating sun position and sunlight phases for the given location and time.
- * See https://github.com/mourner/suncalc for source code and more information.
+ * SunCalc is a JavaScript library for calculating sun position and sunlight phases.
+ * https://github.com/mourner/suncalc
  */
 
 /*jslint browser: true, node: true, vars: true */
@@ -9,163 +9,153 @@
 (function (global) {
 	"use strict";
 	
-	var SunCalc = {};
+	// export either as a CommonJS module or a global variable
 	
-	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = SunCalc;
+	var SunCalc;
+
+	if (typeof exports !== 'undefined') {
+		SunCalc = exports;
 	} else {
-		global.SunCalc = SunCalc;
+		SunCalc = global.SunCalc = {};
 	}
 	
-	var times = [
-		[-0.83, 'sunrise', 'sunset'],
-		[ -0.3, 'sunriseEnd', 'sunsetStart'],
-		[   -6, 'dawn', 'dusk'],
-		[  -12, 'nauticalDawn', 'nauticalDusk'],
-		[  -18, 'night', 'nightEnd'],
-		[    6, 'goldenHourEnd', 'goldenHour']
-	];
 	
-	var m = Math,
+	// utility shortcuts (for better compression)
+	
+	var m   = Math,
+	    rad = m.PI / 180,
+		sin = m.sin,
+        cos = m.cos;
+		
+	
+	// constants for sun calculations
+	
+	var dayMs = 1000 * 60 * 60 * 24,
 	    J1970 = 2440588,
 	    J2000 = 2451545,
-	    deg2rad = m.PI / 180,
-	    msInDay = 1000 * 60 * 60 * 24,
-	    M0 = 357.5291 * deg2rad,
-	    M1 = 0.98560028 * deg2rad,
-	    J0 = 0.0009,
-	    J1 = 0.0053,
-	    J2 = -0.0069,
-	    C1 = 1.9148 * deg2rad,
-	    C2 = 0.0200 * deg2rad,
-	    C3 = 0.0003 * deg2rad,
-	    P = 102.9372 * deg2rad,
-	    e = 23.45 * deg2rad,
-	    th0 = 280.1600 * deg2rad,
-	    th1 = 360.9856235 * deg2rad;
+	    M0    = rad * 357.5291,
+	    M1    = rad * 0.98560028,
+	    J0    = 0.0009,
+	    J1    = 0.0053,
+	    J2    = -0.0069,
+	    C1    = rad * 1.9148,
+	    C2    = rad * 0.0200,
+	    C3    = rad * 0.0003,
+	    P     = rad * 102.9372,
+	    e     = rad * 23.45,
+	    th0   = rad * 280.1600,
+	    th1   = rad * 360.9856235;
 
-	function dateToJulianDate(date) { 
-		return date.valueOf() / msInDay - 0.5 + J1970; 
-	}
 	
-	function julianDateToDate(j) { 
-		return new Date((j + 0.5 - J1970) * msInDay); 
-	}
+	// date conversions
 	
-	function getJulianCycle(J, lw) { 
-		return m.round(J - J2000 - J0 - lw / (2 * m.PI)); 
-	}
+	function dateToJulianDate(date) { return date.valueOf() / dayMs - 0.5 + J1970; }
+	function julianDateToDate(j)    { return new Date((j + 0.5 - J1970) * dayMs);  }
 	
-	function getApproxSolarTransit(Ht, lw, n) { 
-		return J2000 + J0 + (Ht + lw) / (2 * m.PI) + n; 
-	}
 	
-	function getSolarMeanAnomaly(Js) { 
-		return M0 + M1 * (Js - J2000); 
-	}
+	// general sun calculations
 	
-	function getEquationOfCenter(M) { 
-		return C1 * m.sin(M) + C2 * m.sin(2 * M) + C3 * m.sin(3 * M); 
-	}
+	function getJulianCycle(J, lw)      { return m.round(J - J2000 - J0 - lw / (2 * m.PI)); }
+	function getSolarMeanAnomaly(Js)    { return M0 + M1 * (Js - J2000);                    }
+	function getEquationOfCenter(M)     { return C1 * sin(M) + C2 * sin(2 * M) + 
+	                                                           C3 * sin(3 * M);             }
+	function getEclipticLongitude(M, C) { return M + P + C + m.PI;                          }
+	function getSunDeclination(Ls)      { return m.asin(sin(Ls) * sin(e));                  }
 	
-	function getEclipticLongitude(M, C) { 
-		return M + P + C + m.PI; 
-	}
 	
-	function getSolarTransit(Js, M, Lsun) { 
-		return Js + (J1 * m.sin(M)) + (J2 * m.sin(2 * Lsun)); 
-	}
+	// calculations for sun times
 	
-	function getSunDeclination(Lsun) { 
-		return m.asin(m.sin(Lsun) * m.sin(e)); 
-	}
+	function getApproxTransit(Ht, lw, n) { return J2000 + J0 + (Ht + lw) / (2 * m.PI) + n; }
+	function getSolarTransit(Js, M, Ls)  { return Js + (J1 * sin(M)) + (J2 * sin(2 * Ls)); }
+	function getHourAngle(h, phi, d)     { return m.acos((sin(h) - sin(phi) * sin(d)) / 
+	                                                     (cos(phi) * cos(d)));             }
 	
-	function getRightAscension(Lsun) {
-		return m.atan2(m.sin(Lsun) * m.cos(e), m.cos(Lsun));
-	}
+	// calculations for sun position
 	
-	function getSiderealTime(J, lw) {
-		return th0 + th1 * (J - J2000) - lw;
-	}
+	function getRightAscension(Ls)  { return m.atan2(sin(Ls) * cos(e), cos(Ls)); }
+	function getSiderealTime(J, lw) { return th0 + th1 * (J - J2000) - lw;       }
+	function getAzimuth(H, phi, d)  { return m.atan2(sin(H), cos(H) * sin(phi) - 
+	                                                 m.tan(d) * cos(phi));       }
+	function getAltitude(H, phi, d) { return m.asin(sin(phi) * sin(d) + 
+	                                                cos(phi) * cos(d) * cos(H)); }
 	
-	function getAzimuth(th, a, phi, d) {
-		var H = th - a;
-		return m.atan2(m.sin(H), m.cos(H) * m.sin(phi) - 
-				m.tan(d) * m.cos(phi));
-	}
 	
-	function getAltitude(th, a, phi, d) {
-		var H = th - a;
-		return m.asin(m.sin(phi) * m.sin(d) + 
-				m.cos(phi) * m.cos(d) * m.cos(H));
-	}
+	// times configuration (angle, morning name, evening name)
 	
-	function getHourAngle(h, phi, d) { 
-		return m.acos((m.sin(h) - m.sin(phi) * m.sin(d)) / 
-				(m.cos(phi) * m.cos(d))); 
-	}
+	var times = [[-0.83, 'sunrise',       'sunset'      ],
+	             [ -0.3, 'sunriseEnd',    'sunsetStart' ],
+	             [   -6, 'dawn',          'dusk'        ],
+	             [  -12, 'nauticalDawn',  'nauticalDusk'],
+	             [  -18, 'night',         'nightEnd'    ],
+	             [    6, 'goldenHourEnd', 'goldenHour'  ]];
+
+	
+	// adds a custom time to the times config
+
+	SunCalc.addTime = function (angle, riseName, setName) {
+		times.push([angle, riseName, setName]);
+	};
+ 
+ 
+	// calculates sun times for a given date and latitude/longitude
 	
 	SunCalc.getTimes = function (date, lat, lng) {
-		var lw = -lng * deg2rad,
-		    phi = lat * deg2rad,
-		    J = dateToJulianDate(date),
-		    n = getJulianCycle(J, lw),
-		    Js = getApproxSolarTransit(0, lw, n),
-		    M = getSolarMeanAnomaly(Js),
-		    C = getEquationOfCenter(M),
-		    Lsun = getEclipticLongitude(M, C),
-		    d = getSunDeclination(Lsun),
-		    Jtransit = getSolarTransit(Js, M, Lsun);
+		var lw  = rad * -lng,
+		    phi = rad * lat,
+		    J   = dateToJulianDate(date),
+		    n   = getJulianCycle(J, lw),
+		    Js  = getApproxTransit(0, lw, n),
+		    M   = getSolarMeanAnomaly(Js),
+		    C   = getEquationOfCenter(M),
+		    Ls  = getEclipticLongitude(M, C),
+		    d   = getSunDeclination(Ls),
+		    Jnoon = getSolarTransit(Js, M, Ls);
 			
-		function getSunsetJ(h) { 
+		function getSetJ(h) { 
 			var w = getHourAngle(h, phi, d),
-			    approx = getApproxSolarTransit(w, lw, n);
-			return getSolarTransit(approx, M, Lsun); 
+			    a = getApproxTransit(w, lw, n);
+			return getSolarTransit(a, M, Ls); 
 		}
 		
-		function getSunriseJ(Jset) { 
-			return Jtransit - (Jset - Jtransit); 
-		}
-			
-		var result = {solarNoon: julianDateToDate(Jtransit)},
-			len = times.length, 
-		    i, 
-			time, 
-			Jset, 
-			Jrise;
+		var result = {solarNoon: julianDateToDate(Jnoon)};
 		
-		for (i = 0; i < len; i += 1) {
+		var i, len, time, angle, morningName, eveningName, Jset, Jrise;
+		for (i = 0, len = times.length; i < len; i += 1) {
 			time = times[i];
-			Jset = getSunsetJ(time[0] * deg2rad);
-			Jrise = getSunriseJ(Jset);
 			
-			result[time[1]] = julianDateToDate(Jrise);
-			result[time[2]] = julianDateToDate(Jset);
+			angle       = time[0];
+			morningName = time[1];
+			eveningName = time[2];
+			
+			Jset  = getSetJ(angle * rad);
+			Jrise = Jnoon - (Jset - Jnoon);
+			
+			result[morningName] = julianDateToDate(Jrise);
+			result[eveningName] = julianDateToDate(Jset);
 		}
 		
 		return result;
 	};
+	
+	
+	// calculates sun azimuth and altitude for a given date and latitude/longitude
 		
-	SunCalc.getSunPosition = function (date, lat, lng) {
-		var lw = -lng * deg2rad,
-		    phi = lat * deg2rad,
-		    J = dateToJulianDate(date),
-		    M = getSolarMeanAnomaly(J),
-		    C = getEquationOfCenter(M),
-		    Lsun = getEclipticLongitude(M, C),
-		    d = getSunDeclination(Lsun),
-		    a = getRightAscension(Lsun),
-		    th = getSiderealTime(J, lw);
+	SunCalc.getPosition = function (date, lat, lng) {
+		var lw  = rad * -lng,
+		    phi = rad * lat,
+		    J   = dateToJulianDate(date),
+		    M   = getSolarMeanAnomaly(J),
+		    C   = getEquationOfCenter(M),
+		    Ls  = getEclipticLongitude(M, C),
+		    d   = getSunDeclination(Ls),
+		    a   = getRightAscension(Ls),
+		    th  = getSiderealTime(J, lw),
+		    H   = th - a;
 		
 		return {
-			azimuth: getAzimuth(th, a, phi, d),
-			altitude: getAltitude(th, a, phi, d)
+			azimuth:  getAzimuth(H, phi, d),
+			altitude: getAltitude(H, phi, d)
 		};
 	};
 	
-	SunCalc.addTime = function (angle, riseName, setName) {
-		times.push([angle, riseName, setName]);
-	};
-	
-	SunCalc.rad2deg = 1 / deg2rad;
 }(this));

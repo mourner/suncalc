@@ -15,10 +15,10 @@ var times = SunCalc.getTimes(new Date(), 51.5, -0.1);
 var sunriseStr = times.sunrise.getHours() + ':' + times.sunrise.getMinutes();
 
 // get position of the sun (azimuth and altitude) at today's sunrise
-var sunrisePos = SunCalc.getSunPosition(times.sunrise, 51.5, -0.1);
+var sunrisePos = SunCalc.getPosition(times.sunrise, 51.5, -0.1);
 
 // get sunrise azimuth in degrees
-var sunriseAzimuth = sunrisePos.azimuth * SunCalc.rad2deg;
+var sunriseAzimuth = sunrisePos.azimuth * 180 / Math.PI;
 ```
 
 ## Reference
@@ -44,7 +44,7 @@ Returns an object with the following properties (each is a `Date` object):
  * `dawn`: dawn (morning nautical twilight ends, morning civil twilight starts)
  
 ```javascript
-SunCalc.getSunPosition(/*Date*/ timeAndDate, /*Number*/ latitude, /*Number*/ longitude)
+SunCalc.getPosition(/*Date*/ timeAndDate, /*Number*/ latitude, /*Number*/ longitude)
 ```
 
 Returns an object with the following properties:
@@ -56,10 +56,4 @@ Returns an object with the following properties:
 SunCalc.addTime(/*Number*/ angleInDegrees, /*String*/ morningName, /*String*/ eveningName)
 ```
 
-Adds a custom time when the sun reaches the given angle to results returned by `SunCalc.getTimes`. 
-
-```javascript
-SunCalc.rad2deg
-```
-
-Multiplier for converting radians to degrees or back, equals `180 / Math.PI`.
+Adds a custom time when the sun reaches the given angle to results returned by `SunCalc.getTimes`.
