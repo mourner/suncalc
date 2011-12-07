@@ -21,6 +21,17 @@ var sunrisePos = SunCalc.getPosition(times.sunrise, 51.5, -0.1);
 var sunriseAzimuth = sunrisePos.azimuth * 180 / Math.PI;
 ```
 
+## Using in a server environment
+
+In addition to browsers, SunCalc can be used in server environments like Node:
+
+```javascript
+var SunCalc = require('suncalc');
+// [...] (use SunCalc object as usual)
+```
+
+It is available as an NPM package, so you can install it with `npm install suncalc`.
+
 ## Reference
 
 ```javascript
@@ -42,7 +53,7 @@ Returns an object with the following properties (each is a `Date` object):
  * `nightEnd`: night ends (morning astronomical twilight starts)
  * `nauticalDawn`: nautical dawn (morning nautical twilight starts)
  * `dawn`: dawn (morning nautical twilight ends, morning civil twilight starts)
- 
+
 ```javascript
 SunCalc.getPosition(/*Date*/ timeAndDate, /*Number*/ latitude, /*Number*/ longitude)
 ```
