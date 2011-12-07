@@ -1,5 +1,5 @@
 {
-	"name": "SunCalc",
+	"name": "suncalc",
 	"description": "A tiny JavaScript library for calculating sun position and sunlight phases for the given location and time.",
 	"homepage": "https://github.com/mourner/suncalc",
 	"keywords": ["sun", "astronomy", "math", "calculation", "sunrise", "sunset"],
