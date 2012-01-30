@@ -3,7 +3,7 @@ SunCalc
 
 SunCalc is a tiny BSD-licensed JavaScript library for calculating sun position and sunlight phases (times for sunrise, sunset, dusk, etc.) for the given location and time, created by [Vladimir Agafonkin](http://agafonkin.com/en) ([@mourner](https://github.com/mourner)) as a part of the [SunCalc.net project](http://suncalc.net).
 
-All calculations are based on the formulae given in the excellent [Astronomy Answers article about position of the sun](http://www.astro.uu.nl/~strous/AA/en/reken/zonpositie.html). You can read about different twilight phases calculated by SunCalc in the [Twilight article on Wikipedia](http://en.wikipedia.org/wiki/Twilight).
+All calculations are based on the formulae given in the excellent [Astronomy Answers article about position of the sun](http://aa.quae.nl/en/reken/zonpositie.html). You can read about different twilight phases calculated by SunCalc in the [Twilight article on Wikipedia](http://en.wikipedia.org/wiki/Twilight).
 
 ## Usage example
 
