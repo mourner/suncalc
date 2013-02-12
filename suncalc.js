@@ -116,7 +116,10 @@
 			return getSolarTransit(a, M, Ls);
 		}
 
-		var result = {solarNoon: julianDateToDate(Jnoon)};
+		var result = {
+			solarNoon: julianDateToDate(Jnoon),
+			nadir: julianDateToDate(Jnoon - 0.5)
+		};
 
 		var i, len, time, angle, morningName, eveningName, Jset, Jrise;
 		for (i = 0, len = times.length; i < len; i += 1) {
