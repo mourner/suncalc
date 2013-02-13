@@ -53,6 +53,7 @@ Returns an object with the following properties (each is a `Date` object):
  * `nightEnd`: night ends (morning astronomical twilight starts)
  * `nauticalDawn`: nautical dawn (morning nautical twilight starts)
  * `dawn`: dawn (morning nautical twilight ends, morning civil twilight starts)
+ * `nadir`: nadir (darkest moment of the night, sun is in the lowest position)
 
 ```javascript
 SunCalc.getPosition(/*Date*/ timeAndDate, /*Number*/ latitude, /*Number*/ longitude)
