@@ -1,10 +1,10 @@
 {
 	"name": "suncalc",
-	"description": "A tiny JavaScript library for calculating sun position and sunlight phases for the given location and time.",
+	"description": "A tiny JavaScript library for calculating sun/moon position and sunlight phases.",
 	"homepage": "https://github.com/mourner/suncalc",
-	"keywords": ["sun", "astronomy", "math", "calculation", "sunrise", "sunset"],
+	"keywords": ["sun", "astronomy", "math", "calculation", "sunrise", "sunset", "twilight", "moon"],
 	"author": "Vladimir Agafonkin",
 	"repository" : {"type": "git", "url": "git://github.com/mourner/suncalc.git"},
 	"main": "suncalc.js",
-	"version": "1.0.0"
+	"version": "1.1.0"
 }
