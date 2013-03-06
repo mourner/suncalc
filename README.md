@@ -1,9 +1,9 @@
 SunCalc
 =======
 
-SunCalc is a tiny BSD-licensed JavaScript library for calculating sun position and sunlight phases (times for sunrise, sunset, dusk, etc.) for the given location and time, created by [Vladimir Agafonkin](http://agafonkin.com/en) ([@mourner](https://github.com/mourner)) as a part of the [SunCalc.net project](http://suncalc.net).
+SunCalc is a tiny BSD-licensed JavaScript library for calculating sun position, sunlight phases (times for sunrise, sunset, dusk, etc.) and moon position for the given location and time, created by [Vladimir Agafonkin](http://agafonkin.com/en) ([@mourner](https://github.com/mourner)) as a part of the [SunCalc.net project](http://suncalc.net).
 
-All calculations are based on the formulae given in the excellent [Astronomy Answers article about position of the sun](http://aa.quae.nl/en/reken/zonpositie.html). You can read about different twilight phases calculated by SunCalc in the [Twilight article on Wikipedia](http://en.wikipedia.org/wiki/Twilight).
+All calculations are based on the formulas given in the excellent [Astronomy Answers article about position of the sun](http://aa.quae.nl/en/reken/zonpositie.html) (and [this one](http://aa.quae.nl/en/reken/hemelpositie.html) for the moon position). You can read about different twilight phases calculated by SunCalc in the [Twilight article on Wikipedia](http://en.wikipedia.org/wiki/Twilight).
 
 ## Usage example
 
@@ -69,3 +69,13 @@ SunCalc.addTime(/*Number*/ angleInDegrees, /*String*/ morningName, /*String*/ ev
 ```
 
 Adds a custom time when the sun reaches the given angle to results returned by `SunCalc.getTimes`.
+
+```javascript
+SunCalc.getMoonPosition(/*Date*/ timeAndDate, /*Number*/ latitude, /*Number*/ longitude)
+```
+
+Returns an object with the following properties:
+
+ * `altitude`: moon altitude above the horizon in radians.
+ * `azimuth`: moon azimuth in radians.
+ * `distance`: distance to moon in kilometers.
