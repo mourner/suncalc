@@ -26,8 +26,9 @@
 	    rad = PI / 180,
 	    sin = Math.sin,
 	    cos = Math.cos,
+	    tan = Math.tan,
 	    asin = Math.asin,
-	    atan2 = Math.atan2;
+	    atan = Math.atan2;
 
 
 	// date constants and conversions
@@ -55,16 +56,13 @@
 	    C2  = rad * 0.0200,
 	    C3  = rad * 0.0003,
 	    P   = rad * 102.9372,
-	    e   = rad * 23.45,
+	    e   = rad * 23.4397,
 	    th0 = rad * 280.1600,
 	    th1 = rad * 360.9856235;
 
 
 	// general sun calculations
 
-	function getJulianCycle(J, lw) {
-		return Math.round(J - J2000 - J0 - lw / (2 * PI));
-	}
 	function getSolarMeanAnomaly(Js) {
 		return M0 + M1 * (Js - J2000);
 	}
@@ -77,18 +75,18 @@
 	function getSunDeclination(Ls) {
 		return asin(sin(Ls) * sin(e));
 	}
+	function getRightAscension(Ls) {
+		return atan(sin(Ls) * cos(e), cos(Ls));
+	}
 
 
 	// calculations for sun position
 
-	function getRightAscension(Ls) {
-		return atan2(sin(Ls) * cos(e), cos(Ls));
-	}
 	function getSiderealTime(J, lw) {
 		return th0 + th1 * (J - J2000) - lw;
 	}
 	function getAzimuth(H, phi, d) {
-		return atan2(sin(H), cos(H) * sin(phi) - Math.tan(d) * cos(phi));
+		return atan(sin(H), cos(H) * sin(phi) - tan(d) * cos(phi));
 	}
 	function getAltitude(H, phi, d) {
 		return asin(sin(phi) * sin(d) + cos(phi) * cos(d) * cos(H));
@@ -97,6 +95,9 @@
 
 	// calculations for sun times
 
+	function getJulianCycle(J, lw) {
+		return Math.round(J - J2000 - J0 - lw / (2 * PI));
+	}
 	function getApproxTransit(Ht, lw, n) {
 		return J2000 + J0 + (Ht + lw) / (2 * PI) + n;
 	}
@@ -199,6 +200,46 @@
 		}
 
 		return result;
+	};
+
+
+	function getMoonRightAscension(l, b) {
+		return atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l));
+	}
+
+	function getMoonDeclination(l, b) {
+		return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l));
+	}
+	function getRefractedAltitude(h) {
+		return h + 0.017 * rad / tan(h + 10.26 * rad / (h + 5.10 * rad));
+	}
+
+
+	SunCalc.getMoonPosition = function (date, lat, lng) {
+
+		var lw  = rad * -lng,
+		    phi = rad * lat,
+
+		    J  = toJulian(date),
+		    Jd = J - J2000,
+
+		    L = 218.316 + 13.176396 * Jd,
+		    M = 134.963 + 13.064993 * Jd,
+		    F = 93.272 + 13.229350 * Jd,
+		    l = rad * (L + 6.289 * sin(rad * M)),
+		    b = rad * 5.128 * sin(rad * F),
+		    dt = 385001 - 20905 * cos(rad  * M),
+
+		    a = getMoonRightAscension(l, b),
+			d = getMoonDeclination(l, b),
+		    th = getSiderealTime(J, lw),
+		    H = th - a;
+
+		return {
+			azimuth: getAzimuth(H, phi, d),
+			altitude: getRefractedAltitude(getAltitude(H, phi, d)),
+			distance: dt
+		};
 	};
 
 }(this));
