@@ -166,7 +166,7 @@
 		function getSetJ(h) {
 			var w = getHourAngle(h, phi, dec),
 			    a = getApproxTransit(w, lw, n);
-			return getSolarTransit(a, M, Ls);
+			return J2000 + getSolarTransit(a, M, Ls);
 		}
 
 		var result = {
