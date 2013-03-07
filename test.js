@@ -9,8 +9,13 @@ var date = new Date('2013-03-05UTC'),
 
 var sunPos = SunCalc.getPosition(date, lat, lng);
 
-assert.equal(sunPos.azimuth, -2.5003175907168385);
-assert.equal(sunPos.altitude, -0.7000406838781611);
+function assertNear(val1, val2, margin) {
+	margin = margin || 1E-15;
+	assert.ok(Math.abs(val1 - val2) < margin, 'asserted almost equal: ' + val1 + ', ' + val2);
+}
+
+assertNear(sunPos.azimuth, -2.5003175907168385);
+assertNear(sunPos.altitude, -0.7000406838781611);
 
 
 var times = SunCalc.getTimes(date, lat, lng);
@@ -39,9 +44,9 @@ for (var i in testTimes) {
 
 var moonPos = SunCalc.getMoonPosition(date, lat, lng);
 
-assert.equal(moonPos.azimuth, -0.9783999522438226);
-assert.equal(moonPos.altitude, 0.006969727754891917);
-assert.equal(moonPos.distance, 364121.37256256194);
+assertNear(moonPos.azimuth, -0.9783999522438226);
+assertNear(moonPos.altitude, 0.006969727754891917);
+assertNear(moonPos.distance, 364121.37256256194);
 
-assert.equal(SunCalc.getMoonFraction(date, lat, lng), 0.4848068202456373);
+assertNear(SunCalc.getMoonFraction(date, lat, lng), 0.4848068202456373);
 

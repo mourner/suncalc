@@ -79,7 +79,7 @@
 		return rad * (357.5291 + 0.98560028 * d);
 	}
 	function getEquationOfCenter(M) {
-		return rad * (1.9148 * sin(M) + 0.0200 * sin(2 * M) + 0.0003 * sin(3 * M));
+		return rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M));
 	}
 	function getEclipticLongitude(M, C) {
 		var P = rad * 102.9372; // perihelion of the Earth
@@ -107,8 +107,7 @@
 		    d   = toDays(date),
 
 		    c  = getSunCoords(d),
-		    th = getSiderealTime(d, lw),
-		    H  = th - c.ra;
+		    H  = getSiderealTime(d, lw) - c.ra;
 
 		return {
 			azimuth: getAzimuth(H, phi, c.dec),
@@ -187,23 +186,16 @@
 			nadir: fromJulian(Jnoon - 0.5)
 		};
 
-		var i, len, time,
-		    angle, morningName, eveningName,
-		    Jset, Jrise;
+		var i, len, time, angle, morningName, eveningName, Jset, Jrise;
 
 		for (i = 0, len = times.length; i < len; i += 1) {
-
 			time = times[i];
 
-			angle = time[0];
-			morningName = time[1];
-			eveningName = time[2];
-
-			Jset = getSetJ(angle * rad);
+			Jset = getSetJ(time[0] * rad);
 			Jrise = Jnoon - (Jset - Jnoon);
 
-			result[morningName] = fromJulian(Jrise);
-			result[eveningName] = fromJulian(Jset);
+			result[time[1]] = fromJulian(Jrise);
+			result[time[2]] = fromJulian(Jset);
 		}
 
 		return result;
