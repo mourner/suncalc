@@ -1,6 +1,6 @@
 {
 	"name": "suncalc",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "A tiny JavaScript library for calculating sun/moon positions and phases.",
 
 	"homepage": "https://github.com/mourner/suncalc",
