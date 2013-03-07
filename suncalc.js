@@ -240,7 +240,7 @@
 		    h = getAltitude(H, phi, c.dec);
 
 		// altitude correction for refraction
-		h = h + 0.017 * rad / tan(h + 10.26 * rad / (h + 5.10 * rad));
+		h = h + rad * 0.017 / tan(h + rad * 10.26 / (h + rad * 5.10));
 
 		return {
 			azimuth: getAzimuth(H, phi, c.dec),
@@ -259,7 +259,7 @@
 		    s = getSunCoords(d),
 		    m = getMoonCoords(d),
 
-		    sdist = 1.49598e8, // distance from Earth to Sun
+		    sdist = 149598000, // distance from Earth to Sun in km
 
 		    phi = acos(sin(s.dec) * sin(m.dec) + cos(s.dec) * cos(m.dec) * cos(s.ra - m.ra)),
 		    inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi));
