@@ -5,16 +5,16 @@ var date = new Date('2013-03-05UTC'),
 	lat = 50.5,
 	lng = 30.5;
 
-assert.deepEqual(sc.getMoonPosition(date, lat, lng), {
-	azimuth: -0.9783999522438226,
-	altitude: 0.006969727754891917,
-	distance: 364121.37256256194
-});
+var moonPos = sc.getMoonPosition(date, lat, lng);
 
-assert.deepEqual(sc.getPosition(date, lat, lng), {
-	azimuth: -2.5003175907168385,
-	altitude: -0.7000406838781611
-});
+assert.equal(moonPos.azimuth, -0.9783999522438226);
+assert.equal(moonPos.altitude, 0.006969727754891917);
+assert.equal(moonPos.distance, 364121.37256256194);
+
+var sunPos = sc.getPosition(date, lat, lng);
+
+assert.equal(sunPos.azimuth, -2.5003175907168385);
+assert.equal(sunPos.altitude, -0.7000406838781611);
 
 var times = sc.getTimes(date, lat, lng);
 
@@ -32,3 +32,5 @@ assert.equal(times.nightEnd.toUTCString(), new Date("2013-03-05T02:46:17Z").toUT
 assert.equal(times.night.toUTCString(), new Date("2013-03-05T17:35:36Z").toUTCString());
 assert.equal(times.goldenHourEnd.toUTCString(), new Date("2013-03-05T05:19:01Z").toUTCString());
 assert.equal(times.goldenHour.toUTCString(), new Date("2013-03-05T15:02:52Z").toUTCString());
+
+assert.equal(sc.getMoonFraction(date, lat, lng), 0.4848068202456373);

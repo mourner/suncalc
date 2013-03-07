@@ -79,3 +79,9 @@ Returns an object with the following properties:
  * `altitude`: moon altitude above the horizon in radians.
  * `azimuth`: moon azimuth in radians.
  * `distance`: distance to moon in kilometers.
+
+```javascript
+SunCalc.getMoonFraction(/*Date*/ timeAndDate)
+```
+
+Returns the illuminated fraction of the moon; varies from `0.0` (new moon) to `1.0` (full moon).
