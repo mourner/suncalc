@@ -173,7 +173,7 @@
 		    Jnoon = getSolarTransitJ(ds, M, L);
 
 
-	    // returns set time for the given sun altitude
+		// returns set time for the given sun altitude
 		function getSetJ(h) {
 			var w = getHourAngle(h, phi, dec),
 			    a = getApproxTransit(w, lw, n);
