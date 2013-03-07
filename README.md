@@ -1,3 +1,4 @@
+
 SunCalc
 =======
 
@@ -12,6 +13,7 @@ about [position of the sun](http://aa.quae.nl/en/reken/zonpositie.html)
 and [the planets](http://aa.quae.nl/en/reken/hemelpositie.html).
 You can read about different twilight phases calculated by SunCalc
 in the [Twilight article on Wikipedia](http://en.wikipedia.org/wiki/Twilight).
+
 
 ## Usage example
 
@@ -29,6 +31,7 @@ var sunrisePos = SunCalc.getPosition(times.sunrise, 51.5, -0.1);
 var sunriseAzimuth = sunrisePos.azimuth * 180 / Math.PI;
 ```
 
+
 ## Using in a server environment
 
 In addition to browsers, SunCalc can be used in server environments like Node,
@@ -38,7 +41,10 @@ and is available as an NPM package (`npm install suncalc`).
 var SunCalc = require('suncalc');
 ```
 
+
 ## Reference
+
+### Sunlight times
 
 ```javascript
 SunCalc.getTimes(/*Date*/ date, /*Number*/ latitude, /*Number*/ longitude)
@@ -62,6 +68,15 @@ Returns an object with the following properties (each is a `Date` object):
  * `nadir`: nadir (darkest moment of the night, sun is in the lowest position)
 
 ```javascript
+SunCalc.addTime(/*Number*/ angleInDegrees, /*String*/ morningName, /*String*/ eveningName)
+```
+
+Adds a custom time when the sun reaches the given angle to results returned by `SunCalc.getTimes`.
+
+
+### Sun position
+
+```javascript
 SunCalc.getPosition(/*Date*/ timeAndDate, /*Number*/ latitude, /*Number*/ longitude)
 ```
 
@@ -70,11 +85,8 @@ Returns an object with the following properties:
  * `altitude`: sun altitude above the horizon in radians, e.g. `0` at the horizon and `PI/2` at the zenith (straight over your head)
  * `azimuth`: sun azimuth in radians (direction along the horizon, measured from south to west), e.g. `0` is south and `Math.PI * 3/4` is northwest
 
-```javascript
-SunCalc.addTime(/*Number*/ angleInDegrees, /*String*/ morningName, /*String*/ eveningName)
-```
 
-Adds a custom time when the sun reaches the given angle to results returned by `SunCalc.getTimes`.
+### Moon position
 
 ```javascript
 SunCalc.getMoonPosition(/*Date*/ timeAndDate, /*Number*/ latitude, /*Number*/ longitude)
@@ -85,6 +97,9 @@ Returns an object with the following properties:
  * `altitude`: moon altitude above the horizon in radians
  * `azimuth`: moon azimuth in radians
  * `distance`: distance to moon in kilometers
+
+
+### Moon illumination
 
 ```javascript
 SunCalc.getMoonFraction(/*Date*/ timeAndDate)
