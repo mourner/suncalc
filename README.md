@@ -1,9 +1,17 @@
 SunCalc
 =======
 
-SunCalc is a tiny BSD-licensed JavaScript library for calculating sun position, sunlight phases (times for sunrise, sunset, dusk, etc.) and moon position for the given location and time, created by [Vladimir Agafonkin](http://agafonkin.com/en) ([@mourner](https://github.com/mourner)) as a part of the [SunCalc.net project](http://suncalc.net).
+SunCalc is a tiny BSD-licensed JavaScript library for calculating sun position,
+sunlight phases (times for sunrise, sunset, dusk, etc.),
+moon position and lunar phase for the given location and time,
+created by [Vladimir Agafonkin](http://agafonkin.com/en) ([@mourner](https://github.com/mourner))
+as a part of the [SunCalc.net project](http://suncalc.net).
 
-All calculations are based on the formulas given in the excellent [Astronomy Answers article about position of the sun](http://aa.quae.nl/en/reken/zonpositie.html) (and [this one](http://aa.quae.nl/en/reken/hemelpositie.html) for the moon position). You can read about different twilight phases calculated by SunCalc in the [Twilight article on Wikipedia](http://en.wikipedia.org/wiki/Twilight).
+Most calculations are based on the formulas given in the excellent Astronomy Answers articles
+about [position of the sun](http://aa.quae.nl/en/reken/zonpositie.html)
+and [the planets](http://aa.quae.nl/en/reken/hemelpositie.html).
+You can read about different twilight phases calculated by SunCalc
+in the [Twilight article on Wikipedia](http://en.wikipedia.org/wiki/Twilight).
 
 ## Usage example
 
@@ -23,14 +31,12 @@ var sunriseAzimuth = sunrisePos.azimuth * 180 / Math.PI;
 
 ## Using in a server environment
 
-In addition to browsers, SunCalc can be used in server environments like Node:
+In addition to browsers, SunCalc can be used in server environments like Node,
+and is available as an NPM package (`npm install suncalc`).
 
-```javascript
+```js
 var SunCalc = require('suncalc');
-// [...] (use SunCalc object as usual)
 ```
-
-It is available as an NPM package, so you can install it with `npm install suncalc`.
 
 ## Reference
 
@@ -76,9 +82,9 @@ SunCalc.getMoonPosition(/*Date*/ timeAndDate, /*Number*/ latitude, /*Number*/ lo
 
 Returns an object with the following properties:
 
- * `altitude`: moon altitude above the horizon in radians.
- * `azimuth`: moon azimuth in radians.
- * `distance`: distance to moon in kilometers.
+ * `altitude`: moon altitude above the horizon in radians
+ * `azimuth`: moon azimuth in radians
+ * `distance`: distance to moon in kilometers
 
 ```javascript
 SunCalc.getMoonFraction(/*Date*/ timeAndDate)
