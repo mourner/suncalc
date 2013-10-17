@@ -60,8 +60,8 @@ describe('SunCalc', function () {
     });
 
     describe('getMoonFraction', function () {
-        it('should return fraction of illuminated moon given time and location', function () {
-            assertNear(SunCalc.getMoonFraction(date, lat, lng), 0.4848068202456373);
+        it('should return fraction of illuminated moon given time', function () {
+            assertNear(SunCalc.getMoonFraction(date), 0.4848068202456373);
         });
     });
 });
