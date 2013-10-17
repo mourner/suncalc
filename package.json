@@ -1,24 +1,29 @@
 {
-	"name": "suncalc",
-	"version": "1.2.1",
-	"description": "A tiny JavaScript library for calculating sun/moon positions and phases.",
-
-	"homepage": "https://github.com/mourner/suncalc",
-	"keywords": [
-		"sun",
-		"astronomy",
-		"math",
-		"calculation",
-		"sunrise",
-		"sunset",
-		"twilight",
-		"moon",
-		"illumination"
-	],
-	"author": "Vladimir Agafonkin",
-	"repository" : {
-		"type": "git",
-		"url": "git://github.com/mourner/suncalc.git"
-	},
-	"main": "suncalc.js"
+  "name": "suncalc",
+  "version": "1.2.2",
+  "description": "A tiny JavaScript library for calculating sun/moon positions and phases.",
+  "homepage": "https://github.com/mourner/suncalc",
+  "keywords": [
+    "sun",
+    "astronomy",
+    "math",
+    "calculation",
+    "sunrise",
+    "sunset",
+    "twilight",
+    "moon",
+    "illumination"
+  ],
+  "author": "Vladimir Agafonkin",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mourner/suncalc.git"
+  },
+  "main": "suncalc.js",
+  "devDependencies": {
+    "mocha": "~1.13.0"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha"
+  }
 }
