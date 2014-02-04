@@ -230,10 +230,12 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
 };
 
 
-// calculations for illuminated fraction of the moon,
-// based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas
+// calculations for illumination parameters of the moon,
+// based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
+// Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus
+// (Willmann-Bell, Richmond) 1998.
 
-SunCalc.getMoonFraction = function (date) {
+SunCalc.getMoonIllumination = function (date) {
 
     var d = toDays(date),
         s = getSunCoords(d),
@@ -244,7 +246,11 @@ SunCalc.getMoonFraction = function (date) {
         phi = acos(sin(s.dec) * sin(m.dec) + cos(s.dec) * cos(m.dec) * cos(s.ra - m.ra)),
         inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi));
 
-    return (1 + cos(inc)) / 2;
+    return {
+        fraction: (1 + cos(inc)) / 2,
+        angle: atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec)
+            - cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra))
+    };
 };
 
 
