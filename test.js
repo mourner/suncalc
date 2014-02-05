@@ -59,9 +59,12 @@ describe('SunCalc', function () {
         });
     });
 
-    describe('getMoonFraction', function () {
-        it('should return fraction of illuminated moon given time', function () {
-            assertNear(SunCalc.getMoonFraction(date), 0.4848068202456373);
+    describe('getMoonIllumination', function () {
+        it('should return an object with correct fraction and angle of moon\'s illuminated limb given time', function () {
+            var moonIllum = SunCalc.getMoonIllumination(date);
+
+            assertNear(moonIllum.fraction, 0.4848068202456373);
+            assertNear(moonIllum.angle, 1.6732942678578346);
         });
     });
 });

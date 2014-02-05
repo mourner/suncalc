@@ -102,7 +102,10 @@ Returns an object with the following properties:
 ### Moon illumination
 
 ```javascript
-SunCalc.getMoonFraction(/*Date*/ timeAndDate)
+SunCalc.getMoonIllumination(/*Date*/ timeAndDate)
 ```
 
-Returns the illuminated fraction of the moon; varies from `0.0` (new moon) to `1.0` (full moon).
+Returns an object with the following properties:
+
+ * `fraction`: illuminated fraction of the moon; varies from `0.0` (new moon) to `1.0` (full moon)
+ * `angle`: midpoint angle in radians of the illuminated limb of the moon reckoned eastward from the north point of the disk
