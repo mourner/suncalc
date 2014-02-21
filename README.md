@@ -82,8 +82,10 @@ SunCalc.getPosition(/*Date*/ timeAndDate, /*Number*/ latitude, /*Number*/ longit
 
 Returns an object with the following properties:
 
- * `altitude`: sun altitude above the horizon in radians, e.g. `0` at the horizon and `PI/2` at the zenith (straight over your head)
- * `azimuth`: sun azimuth in radians (direction along the horizon, measured from south to west), e.g. `0` is south and `Math.PI * 3/4` is northwest
+ * `altitude`: sun altitude above the horizon in radians,
+ e.g. `0` at the horizon and `PI/2` at the zenith (straight over your head)
+ * `azimuth`: sun azimuth in radians (direction along the horizon, measured from south to west),
+ e.g. `0` is south and `Math.PI * 3/4` is northwest
 
 
 ### Moon position
@@ -108,4 +110,5 @@ SunCalc.getMoonIllumination(/*Date*/ timeAndDate)
 Returns an object with the following properties:
 
  * `fraction`: illuminated fraction of the moon; varies from `0.0` (new moon) to `1.0` (full moon)
- * `angle`: midpoint angle in radians of the illuminated limb of the moon reckoned eastward from the north point of the disk
+ * `angle`: midpoint angle in radians of the illuminated limb of the moon reckoned eastward from the north point of the disk;
+ the moon is waxing if the angle is negative, and waning if positive
