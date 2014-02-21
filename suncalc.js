@@ -1,5 +1,5 @@
 /*
- (c) 2011-2013, Vladimir Agafonkin
+ (c) 2011-2014, Vladimir Agafonkin
  SunCalc is a JavaScript library for calculating sun/mooon position and light phases.
  https://github.com/mourner/suncalc
 */
