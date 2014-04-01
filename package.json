@@ -21,9 +21,10 @@
   },
   "main": "suncalc.js",
   "devDependencies": {
-    "mocha": "~1.13.0"
+    "tape": "^2.12.1",
+    "tap-spec": "^0.1.8"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha"
+    "test": "node test.js | tspec"
   }
 }

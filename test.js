@@ -1,13 +1,12 @@
 
 var SunCalc = require('./suncalc'),
-    assert = require('assert');
+    test = require('tape');
 
-function assertNear(val1, val2, margin) {
-    margin = margin || 1E-15;
-    assert.ok(Math.abs(val1 - val2) < margin, 'asserted almost equal: ' + val1 + ', ' + val2);
+function near(val1, val2, margin) {
+    return Math.abs(val1 - val2) < (margin || 1E-15);
 }
 
-describe('SunCalc', function () {
+test('SunCalc', function (t) {
 
     var date = new Date('2013-03-05UTC'),
         lat = 50.5,
@@ -30,41 +29,45 @@ describe('SunCalc', function () {
         goldenHour: "2013-03-05T15:02:52Z"
     };
 
-    describe('getPosition', function () {
-        it('should return an object with correct azimuth and altitude for the given time and location', function () {
+    t.test('getPosition', function (t) {
+        t.test('should return an object with correct azimuth and altitude for the given time and location', function (t) {
             var sunPos = SunCalc.getPosition(date, lat, lng);
 
-            assertNear(sunPos.azimuth, -2.5003175907168385);
-            assertNear(sunPos.altitude, -0.7000406838781611);
+            t.ok(near(sunPos.azimuth, -2.5003175907168385), 'azimuth');
+            t.ok(near(sunPos.altitude, -0.7000406838781611), 'altitude');
+            t.end();
         });
     });
 
-    describe('getTimes', function () {
-        it('should return correct sun phases for the given date and location', function () {
+    t.test('getTimes', function (t) {
+        t.test('should return correct sun phases for the given date and location', function (t) {
             var times = SunCalc.getTimes(date, lat, lng);
 
             for (var i in testTimes) {
-                assert.equal(times[i].toUTCString(), new Date(testTimes[i]).toUTCString());
+                t.equal(times[i].toUTCString(), new Date(testTimes[i]).toUTCString(), i);
             }
+            t.end();
         });
     });
 
-    describe('getMoonPosition', function () {
-        it('should return an object with correct moon position data given time and location', function () {
+    t.test('getMoonPosition', function (t) {
+        t.test('should return an object with correct moon position data given time and location', function (t) {
             var moonPos = SunCalc.getMoonPosition(date, lat, lng);
 
-            assertNear(moonPos.azimuth, -0.9783999522438226);
-            assertNear(moonPos.altitude, 0.006969727754891917);
-            assertNear(moonPos.distance, 364121.37256256194);
+            t.ok(near(moonPos.azimuth, -0.9783999522438226), 'azimuth');
+            t.ok(near(moonPos.altitude, 0.006969727754891917), 'altitude');
+            t.ok(near(moonPos.distance, 364121.37256256194), 'distance');
+            t.end();
         });
     });
 
-    describe('getMoonIllumination', function () {
-        it('should return an object with correct fraction and angle of moon\'s illuminated limb given time', function () {
+    t.test('getMoonIllumination', function (t) {
+        t.test('should return an object with correct fraction and angle of moon\'s illuminated limb given time', function (t) {
             var moonIllum = SunCalc.getMoonIllumination(date);
 
-            assertNear(moonIllum.fraction, 0.4848068202456373);
-            assertNear(moonIllum.angle, 1.6732942678578346);
+            t.ok(near(moonIllum.fraction, 0.4848068202456373), 'fraction');
+            t.ok(near(moonIllum.angle, 1.6732942678578346), 'angle');
+            t.end();
         });
     });
 });
