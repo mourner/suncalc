@@ -248,8 +248,8 @@ SunCalc.getMoonIllumination = function (date) {
 
     return {
         fraction: (1 + cos(inc)) / 2,
-        angle: atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec)
-            - cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra))
+        angle: atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
+               cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra))
     };
 };
 
