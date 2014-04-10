@@ -232,8 +232,7 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
 
 // calculations for illumination parameters of the moon,
 // based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
-// Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus
-// (Willmann-Bell, Richmond) 1998.
+// Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
 
 SunCalc.getMoonIllumination = function (date) {
 
@@ -257,13 +256,8 @@ SunCalc.getMoonIllumination = function (date) {
 
 
 // export as AMD module / Node module / browser variable
-
-if (typeof define === 'function' && define.amd) {
-    define(SunCalc);
-} else if (typeof module !== 'undefined') {
-    module.exports = SunCalc;
-} else {
-    window.SunCalc = SunCalc;
-}
+if (typeof define === 'function' && define.amd) define(SunCalc);
+else if (typeof module !== 'undefined') module.exports = SunCalc;
+else window.SunCalc = SunCalc;
 
 }());
