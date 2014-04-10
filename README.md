@@ -116,6 +116,7 @@ Returns an object with the following properties:
 
 Moon phase value should be interpreted like this:
 
+| ---- | --------------- |
 | 0    | New Moon        |
 |      | Waxing Crescent |
 | 0.25 | First Quarter   |
