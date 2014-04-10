@@ -66,6 +66,7 @@ test('SunCalc', function (t) {
             var moonIllum = SunCalc.getMoonIllumination(date);
 
             t.ok(near(moonIllum.fraction, 0.4848068202456373), 'fraction');
+            t.ok(near(moonIllum.phase, 0.7548368838538762), 'phase');
             t.ok(near(moonIllum.angle, 1.6732942678578346), 'angle');
             t.end();
         });
