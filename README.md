@@ -110,5 +110,7 @@ SunCalc.getMoonIllumination(/*Date*/ timeAndDate)
 Returns an object with the following properties:
 
  * `fraction`: illuminated fraction of the moon; varies from `0.0` (new moon) to `1.0` (full moon)
+ * `phase`: moon phase; varies from `0.0` to `1.0`,
+ where `0.0` is new moon, `0.25` is first quarter moon, `0.5` is full moon and `0.75` is last quarter)
  * `angle`: midpoint angle in radians of the illuminated limb of the moon reckoned eastward from the north point of the disk;
  the moon is waxing if the angle is negative, and waning if positive

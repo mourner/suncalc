@@ -244,12 +244,14 @@ SunCalc.getMoonIllumination = function (date) {
         sdist = 149598000, // distance from Earth to Sun in km
 
         phi = acos(sin(s.dec) * sin(m.dec) + cos(s.dec) * cos(m.dec) * cos(s.ra - m.ra)),
-        inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi));
+        inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi)),
+        angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
+               cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
 
     return {
         fraction: (1 + cos(inc)) / 2,
-        angle: atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
-               cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra))
+        phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
+        angle: angle
     };
 };
 
