@@ -116,13 +116,11 @@ Returns an object with the following properties:
 
 Moon phase value should be interpreted like this:
 
-| Phase          | Name            |
-| --------------:| ----------------|
-| 0              | New Moon        |
-| 0&ndash;0.25   | Waxing Crescent |
-| 0.25           | First Quarter   |
-| 0.25&ndash;0.5 | Waxing Gibbous  |
-| 0.5            | Full Moon       |
-| 0.5&ndash;0.75 | Waning Gibbous  |
-| 0.75           | Last Quarter    |
-| 0.75&ndash;1   | Waning Crescent |
+| 0    | New Moon        |
+|      | Waxing Crescent |
+| 0.25 | First Quarter   |
+|      | Waxing Gibbous  |
+| 0.5  | Full Moon       |
+|      | Waning Gibbous  |
+| 0.75 | Last Quarter    |
+|      | Waning Crescent |
