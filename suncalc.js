@@ -26,56 +26,44 @@ var dayMs = 1000 * 60 * 60 * 24,
     J1970 = 2440588,
     J2000 = 2451545;
 
-function toJulian(date) {
-    return date.valueOf() / dayMs - 0.5 + J1970;
-}
-function fromJulian(j) {
-    return new Date((j + 0.5 - J1970) * dayMs);
-}
-function toDays(date) {
-    return toJulian(date) - J2000;
-}
+function toJulian(date) { return date.valueOf() / dayMs - 0.5 + J1970; }
+function fromJulian(j)  { return new Date((j + 0.5 - J1970) * dayMs); }
+function toDays(date)   { return toJulian(date) - J2000; }
 
 
 // general calculations for position
 
 var e = rad * 23.4397; // obliquity of the Earth
 
-function getRightAscension(l, b) {
-    return atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l));
-}
-function getDeclination(l, b) {
-    return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l));
-}
-function getAzimuth(H, phi, dec) {
-    return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi));
-}
-function getAltitude(H, phi, dec) {
-    return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H));
-}
-function getSiderealTime(d, lw) {
-    return rad * (280.16 + 360.9856235 * d) - lw;
-}
+function rightAscension(l, b) { return atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l)); }
+function declination(l, b)    { return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l)); }
+
+function azimuth(H, phi, dec)  { return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi)); }
+function altitude(H, phi, dec) { return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H)); }
+
+function siderealTime(d, lw) { return rad * (280.16 + 360.9856235 * d) - lw; }
 
 
 // general sun calculations
 
-function getSolarMeanAnomaly(d) {
-    return rad * (357.5291 + 0.98560028 * d);
-}
-function getEclipticLongitude(M) {
+function solarMeanAnomaly(d) { return rad * (357.5291 + 0.98560028 * d); }
+
+function eclipticLongitude(M) {
+
     var C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)), // equation of center
         P = rad * 102.9372; // perihelion of the Earth
+
     return M + C + P + PI;
 }
-function getSunCoords(d) {
 
-    var M = getSolarMeanAnomaly(d),
-        L = getEclipticLongitude(M);
+function sunCoords(d) {
+
+    var M = solarMeanAnomaly(d),
+        L = eclipticLongitude(M);
 
     return {
-        dec: getDeclination(L, 0),
-        ra: getRightAscension(L, 0)
+        dec: declination(L, 0),
+        ra: rightAscension(L, 0)
     };
 }
 
@@ -91,12 +79,12 @@ SunCalc.getPosition = function (date, lat, lng) {
         phi = rad * lat,
         d   = toDays(date),
 
-        c  = getSunCoords(d),
-        H  = getSiderealTime(d, lw) - c.ra;
+        c  = sunCoords(d),
+        H  = siderealTime(d, lw) - c.ra;
 
     return {
-        azimuth: getAzimuth(H, phi, c.dec),
-        altitude: getAltitude(H, phi, c.dec)
+        azimuth: azimuth(H, phi, c.dec),
+        altitude: altitude(H, phi, c.dec)
     };
 };
 
@@ -123,18 +111,12 @@ SunCalc.addTime = function (angle, riseName, setName) {
 
 var J0 = 0.0009;
 
-function getJulianCycle(d, lw) {
-    return Math.round(d - J0 - lw / (2 * PI));
-}
-function getApproxTransit(Ht, lw, n) {
-    return J0 + (Ht + lw) / (2 * PI) + n;
-}
-function getSolarTransitJ(ds, M, L) {
-    return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L);
-}
-function getHourAngle(h, phi, d) {
-    return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d)));
-}
+function julianCycle(d, lw) { return Math.round(d - J0 - lw / (2 * PI)); }
+
+function approxTransit(Ht, lw, n) { return J0 + (Ht + lw) / (2 * PI) + n; }
+function solarTransitJ(ds, M, L)  { return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L); }
+
+function hourAngle(h, phi, d) { return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d))); }
 
 
 // calculates sun times for a given date and latitude/longitude
@@ -145,21 +127,21 @@ SunCalc.getTimes = function (date, lat, lng) {
         phi = rad * lat,
         d   = toDays(date),
 
-        n  = getJulianCycle(d, lw),
-        ds = getApproxTransit(0, lw, n),
+        n  = julianCycle(d, lw),
+        ds = approxTransit(0, lw, n),
 
-        M = getSolarMeanAnomaly(ds),
-        L = getEclipticLongitude(M),
-        dec = getDeclination(L, 0),
+        M = solarMeanAnomaly(ds),
+        L = eclipticLongitude(M),
+        dec = declination(L, 0),
 
-        Jnoon = getSolarTransitJ(ds, M, L);
+        Jnoon = solarTransitJ(ds, M, L);
 
 
     // returns set time for the given sun altitude
     function getSetJ(h) {
-        var w = getHourAngle(h, phi, dec),
-            a = getApproxTransit(w, lw, n);
-        return getSolarTransitJ(a, M, L);
+        var w = hourAngle(h, phi, dec),
+            a = approxTransit(w, lw, n);
+        return solarTransitJ(a, M, L);
     }
 
     var result = {
@@ -185,7 +167,7 @@ SunCalc.getTimes = function (date, lat, lng) {
 
 // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 
-function getMoonCoords(d) { // geocentric ecliptic coordinates of the moon
+function moonCoords(d) { // geocentric ecliptic coordinates of the moon
 
     var L = rad * (218.316 + 13.176396 * d), // ecliptic longitude
         M = rad * (134.963 + 13.064993 * d), // mean anomaly
@@ -196,8 +178,8 @@ function getMoonCoords(d) { // geocentric ecliptic coordinates of the moon
         dt = 385001 - 20905 * cos(M);  // distance to the moon in km
 
     return {
-        ra: getRightAscension(l, b),
-        dec: getDeclination(l, b),
+        ra: rightAscension(l, b),
+        dec: declination(l, b),
         dist: dt
     };
 }
@@ -208,15 +190,15 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
         phi = rad * lat,
         d   = toDays(date),
 
-        c = getMoonCoords(d),
-        H = getSiderealTime(d, lw) - c.ra,
-        h = getAltitude(H, phi, c.dec);
+        c = moonCoords(d),
+        H = siderealTime(d, lw) - c.ra,
+        h = altitude(H, phi, c.dec);
 
     // altitude correction for refraction
     h = h + rad * 0.017 / tan(h + rad * 10.26 / (h + rad * 5.10));
 
     return {
-        azimuth: getAzimuth(H, phi, c.dec),
+        azimuth: azimuth(H, phi, c.dec),
         altitude: h,
         distance: c.dist
     };
@@ -230,8 +212,8 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
 SunCalc.getMoonIllumination = function (date) {
 
     var d = toDays(date),
-        s = getSunCoords(d),
-        m = getMoonCoords(d),
+        s = sunCoords(d),
+        m = moonCoords(d),
 
         sdist = 149598000, // distance from Earth to Sun in km
 
