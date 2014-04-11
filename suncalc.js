@@ -63,18 +63,15 @@ function getSiderealTime(d, lw) {
 function getSolarMeanAnomaly(d) {
     return rad * (357.5291 + 0.98560028 * d);
 }
-function getEquationOfCenter(M) {
-    return rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M));
-}
-function getEclipticLongitude(M, C) {
-    var P = rad * 102.9372; // perihelion of the Earth
+function getEclipticLongitude(M) {
+    var C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)), // equation of center
+        P = rad * 102.9372; // perihelion of the Earth
     return M + C + P + PI;
 }
 function getSunCoords(d) {
 
     var M = getSolarMeanAnomaly(d),
-        C = getEquationOfCenter(M),
-        L = getEclipticLongitude(M, C);
+        L = getEclipticLongitude(M);
 
     return {
         dec: getDeclination(L, 0),
@@ -152,9 +149,7 @@ SunCalc.getTimes = function (date, lat, lng) {
         ds = getApproxTransit(0, lw, n),
 
         M = getSolarMeanAnomaly(ds),
-        C = getEquationOfCenter(M),
-        L = getEclipticLongitude(M, C),
-
+        L = getEclipticLongitude(M),
         dec = getDeclination(L, 0),
 
         Jnoon = getSolarTransitJ(ds, M, L);
@@ -164,10 +159,8 @@ SunCalc.getTimes = function (date, lat, lng) {
     function getSetJ(h) {
         var w = getHourAngle(h, phi, dec),
             a = getApproxTransit(w, lw, n);
-
         return getSolarTransitJ(a, M, L);
     }
-
 
     var result = {
         solarNoon: fromJulian(Jnoon),
@@ -245,7 +238,7 @@ SunCalc.getMoonIllumination = function (date) {
         phi = acos(sin(s.dec) * sin(m.dec) + cos(s.dec) * cos(m.dec) * cos(s.ra - m.ra)),
         inc = atan(sdist * sin(phi), m.dist - sdist * cos(phi)),
         angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
-               cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
+                cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
 
     return {
         fraction: (1 + cos(inc)) / 2,
