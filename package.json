@@ -21,8 +21,8 @@
   },
   "main": "suncalc.js",
   "devDependencies": {
-    "tape": "^2.12.1",
-    "jshint": "^2.4.4",
+    "tape": "^2.12.3",
+    "jshint": "^2.5.0",
     "faucet": "0.0.1"
   },
   "scripts": {
