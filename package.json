@@ -28,5 +28,10 @@
   "scripts": {
     "test": "jshint suncalc.js test.js && node test.js | faucet",
     "cov": "istanbul cover test.js -x test.js"
+  },
+  "jshintConfig": {
+    "quotmark": "single",
+    "trailing": true,
+    "unused": true
   }
 }

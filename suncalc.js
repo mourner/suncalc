@@ -4,7 +4,7 @@
  https://github.com/mourner/suncalc
 */
 
-(function () { "use strict";
+(function () { 'use strict';
 
 // shortcuts for easier to read formulas
 
@@ -174,7 +174,7 @@ SunCalc.getTimes = function (date, lat, lng) {
         nadir: fromJulian(Jnoon - 0.5)
     };
 
-    var i, len, time, angle, morningName, eveningName, Jset, Jrise;
+    var i, len, time, Jset, Jrise;
 
     for (i = 0, len = times.length; i < len; i += 1) {
         time = times[i];

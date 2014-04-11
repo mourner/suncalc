@@ -13,20 +13,20 @@ test('SunCalc', function (t) {
         lng = 30.5;
 
     var testTimes = {
-        solarNoon: "2013-03-05T10:10:57Z",
-        nadir: "2013-03-04T22:10:57Z",
-        sunrise: "2013-03-05T04:34:57Z",
-        sunset: "2013-03-05T15:46:56Z",
-        sunriseEnd: "2013-03-05T04:38:19Z",
-        sunsetStart: "2013-03-05T15:43:34Z",
-        dawn: "2013-03-05T04:02:17Z",
-        dusk: "2013-03-05T16:19:36Z",
-        nauticalDawn: "2013-03-05T03:24:31Z",
-        nauticalDusk: "2013-03-05T16:57:22Z",
-        nightEnd: "2013-03-05T02:46:17Z",
-        night: "2013-03-05T17:35:36Z",
-        goldenHourEnd: "2013-03-05T05:19:01Z",
-        goldenHour: "2013-03-05T15:02:52Z"
+        solarNoon: '2013-03-05T10:10:57Z',
+        nadir: '2013-03-04T22:10:57Z',
+        sunrise: '2013-03-05T04:34:57Z',
+        sunset: '2013-03-05T15:46:56Z',
+        sunriseEnd: '2013-03-05T04:38:19Z',
+        sunsetStart: '2013-03-05T15:43:34Z',
+        dawn: '2013-03-05T04:02:17Z',
+        dusk: '2013-03-05T16:19:36Z',
+        nauticalDawn: '2013-03-05T03:24:31Z',
+        nauticalDusk: '2013-03-05T16:57:22Z',
+        nightEnd: '2013-03-05T02:46:17Z',
+        night: '2013-03-05T17:35:36Z',
+        goldenHourEnd: '2013-03-05T05:19:01Z',
+        goldenHour: '2013-03-05T15:02:52Z'
     };
 
     t.test('getPosition', function (t) {
