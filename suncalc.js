@@ -1,10 +1,12 @@
+/*globals define, module*/
+/*jslint vars:true*/
 /*
  (c) 2011-2014, Vladimir Agafonkin
  SunCalc is a JavaScript library for calculating sun/mooon position and light phases.
  https://github.com/mourner/suncalc
 */
 
-(function () { 'use strict';
+(function (undef) { 'use strict';
 
 // shortcuts for easier to read formulas
 
@@ -231,8 +233,8 @@ SunCalc.getMoonIllumination = function (date) {
 
 
 // export as AMD module / Node module / browser variable
-if (typeof define === 'function' && define.amd) define(SunCalc);
-else if (typeof module !== 'undefined') module.exports = SunCalc;
-else window.SunCalc = SunCalc;
+if (typeof define === 'function' && define.amd) {define(SunCalc);}
+else if (module !== undef) {module.exports = SunCalc;}
+else {window.SunCalc = SunCalc;}
 
 }());
