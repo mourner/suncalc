@@ -75,6 +75,8 @@ SunCalc.addTime(/*Number*/ angleInDegrees, /*String*/ morningName, /*String*/ ev
 
 Adds a custom time when the sun reaches the given angle to results returned by `SunCalc.getTimes`.
 
+`SunCalc.times` property contains all currently defined times.
+
 
 ### Sun position
 
