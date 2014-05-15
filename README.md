@@ -130,3 +130,32 @@ Moon phase value should be interpreted like this:
 |       | Waning Gibbous  |
 | 0.75  | Last Quarter    |
 |       | Waning Crescent |
+
+
+## Changelog
+
+#### 1.5.0 &mdash; May 16, 2014
+
+- Exposed `SunCalc.times` property with defined daylight times.
+
+#### 1.4.0 &mdash; Apr 10, 2014
+
+- Added `phase` to `SunCalc.getMoonIllumination` results (moon phase).
+
+#### 1.3.0 &mdash; Feb 21, 2014
+
+- Added `SunCalc.getMoonIllumination` (in place of `getMoonFraction`) that returns an object with `fraction` and `angle`
+(angle of illuminated limb of the moon).
+
+#### 1.2.0 &mdash; Mar 07, 2013
+
+- Added `SunCalc.getMoonFraction` function that returns illuminated fraction of the moon.
+
+#### 1.1.0 &mdash; Mar 06, 2013
+
+- Added `SunCalc.getMoonPosition` function.
+- Added nadir (darkest time of the day, middle of the night).
+
+#### 1.0.0 &mdash; Dec 07, 2011
+
+First version release.
