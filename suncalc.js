@@ -92,12 +92,12 @@ SunCalc.getPosition = function (date, lat, lng) {
 // sun times configuration (angle, morning name, evening name)
 
 var times = SunCalc.times = [
-    [-0.83, 'sunrise',       'sunset'      ],
-    [ -0.3, 'sunriseEnd',    'sunsetStart' ],
-    [   -6, 'dawn',          'dusk'        ],
-    [  -12, 'nauticalDawn',  'nauticalDusk'],
-    [  -18, 'nightEnd',      'night'       ],
-    [    6, 'goldenHourEnd', 'goldenHour'  ]
+    [-0.833, 'sunrise',       'sunset'      ],
+    [  -0.3, 'sunriseEnd',    'sunsetStart' ],
+    [    -6, 'dawn',          'dusk'        ],
+    [   -12, 'nauticalDawn',  'nauticalDusk'],
+    [   -18, 'nightEnd',      'night'       ],
+    [     6, 'goldenHourEnd', 'goldenHour'  ]
 ];
 
 // adds a custom time to the times config
