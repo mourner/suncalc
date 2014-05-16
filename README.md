@@ -134,13 +134,15 @@ Moon phase value should be interpreted like this:
 
 ## Changelog
 
-#### 1.5.0 &mdash; May 16, 2014
+#### 1.5.1 &mdash; May 16, 2014
 
 - Exposed `SunCalc.times` property with defined daylight times.
+- Slightly improved `SunCalc.getTimes` performance.
 
 #### 1.4.0 &mdash; Apr 10, 2014
 
 - Added `phase` to `SunCalc.getMoonIllumination` results (moon phase).
+- Switched from mocha to tape for tests.
 
 #### 1.3.0 &mdash; Feb 21, 2014
 
@@ -155,7 +157,13 @@ Moon phase value should be interpreted like this:
 
 - Added `SunCalc.getMoonPosition` function.
 - Added nadir (darkest time of the day, middle of the night).
+- Added tests.
 
 #### 1.0.0 &mdash; Dec 07, 2011
 
-First version release.
+- Published to NPM.
+- Added `SunCalc.addTime` function.
+
+#### 0.0.0 &mdash; Aug 25, 2011
+
+- First commit.
