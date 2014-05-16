@@ -283,10 +283,14 @@ SunCalc.getMoonTimes = function (date, lat, lng) {
         h0 = h2;
     }
 
-    return {
-        rise: hoursLater(t, rise),
-        set: hoursLater(t, set)
-    };
+    var result = {};
+
+    if (rise) result.rise = hoursLater(t, rise);
+    if (set) result.set = hoursLater(t, set);
+
+    if (!rise && !set) result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
+
+    return result;
 };
 
 
