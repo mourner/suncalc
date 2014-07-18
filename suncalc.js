@@ -26,9 +26,11 @@ var dayMs = 1000 * 60 * 60 * 24,
     J1970 = 2440588,
     J2000 = 2451545;
 
+var SunCalc = {};
+
 function toJulian(date) { return date.valueOf() / dayMs - 0.5 + J1970; }
 function fromJulian(j)  { return new Date((j + 0.5 - J1970) * dayMs); }
-function toDays(date)   { return toJulian(date) - J2000; }
+SunCalc.toDays = function (date)   { return toJulian(date) - J2000; }
 
 
 // general calculations for position
@@ -56,7 +58,7 @@ function eclipticLongitude(M) {
     return M + C + P + PI;
 }
 
-function sunCoords(d) {
+SunCalc.sunCoords = function (d) {
 
     var M = solarMeanAnomaly(d),
         L = eclipticLongitude(M);
@@ -68,18 +70,15 @@ function sunCoords(d) {
 }
 
 
-var SunCalc = {};
-
-
 // calculates sun position for a given date and latitude/longitude
 
 SunCalc.getPosition = function (date, lat, lng) {
 
     var lw  = rad * -lng,
         phi = rad * lat,
-        d   = toDays(date),
+        d   = SunCalc.toDays(date),
 
-        c  = sunCoords(d),
+        c  = SunCalc.sunCoords(d),
         H  = siderealTime(d, lw) - c.ra;
 
     return {
@@ -134,7 +133,7 @@ SunCalc.getTimes = function (date, lat, lng) {
     var lw = rad * -lng,
         phi = rad * lat,
 
-        d = toDays(date),
+        d = SunCalc.toDays(date),
         n = julianCycle(d, lw),
         ds = approxTransit(0, lw, n),
 
@@ -168,7 +167,7 @@ SunCalc.getTimes = function (date, lat, lng) {
 
 // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 
-function moonCoords(d) { // geocentric ecliptic coordinates of the moon
+SunCalc.moonCoords = function (d) { // geocentric ecliptic coordinates of the moon
 
     var L = rad * (218.316 + 13.176396 * d), // ecliptic longitude
         M = rad * (134.963 + 13.064993 * d), // mean anomaly
@@ -189,9 +188,9 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
 
     var lw  = rad * -lng,
         phi = rad * lat,
-        d   = toDays(date),
+        d   = SunCalc.toDays(date),
 
-        c = moonCoords(d),
+        c = SunCalc.moonCoords(d),
         H = siderealTime(d, lw) - c.ra,
         h = altitude(H, phi, c.dec);
 
@@ -212,9 +211,9 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
 
 SunCalc.getMoonIllumination = function (date) {
 
-    var d = toDays(date),
-        s = sunCoords(d),
-        m = moonCoords(d),
+    var d = SunCalc.toDays(date),
+        s = SunCalc.sunCoords(d),
+        m = SunCalc.moonCoords(d),
 
         sdist = 149598000, // distance from Earth to Sun in km
 
