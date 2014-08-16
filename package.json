@@ -19,14 +19,16 @@
     "type": "git",
     "url": "git://github.com/mourner/suncalc.git"
   },
-  "main": "suncalc.js",
+  "main": "suncalc.min.js",
   "devDependencies": {
     "tape": "^2.12.3",
     "jshint": "^2.5.0",
-    "faucet": "0.0.1"
+    "faucet": "0.0.1",
+    "uglify-js": ">=2.0.0"
   },
   "scripts": {
     "test": "jshint suncalc.js test.js && node test.js | faucet",
+    "build": "make build",
     "cov": "istanbul cover test.js -x test.js"
   },
   "jshintConfig": {
