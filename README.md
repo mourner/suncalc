@@ -131,8 +131,25 @@ Moon phase value should be interpreted like this:
 | 0.75  | Last Quarter    |
 |       | Waning Crescent |
 
+### Moon rise and set times
+
+```js
+SunCalc.getMoonTimes(/*Date*/ date, /*Number*/ latitude, /*Number*/ longitude)
+```
+
+Returns an object with the following properties:
+
+ * `rise`: moonrise time as `Date`
+ * `set`: moonset time as `Date`
+ * `alwaysUp`: `true` if the moon never rises/sets and is always _above_ the horizon during the day
+ * `alwaysDown`: `true` if the moon is always _below_ the horizon
+
 
 ## Changelog
+
+#### 1.6.0 &mdash; Oct 27, 2014
+
+- Added `SunCalc.getMoonTimes` for calculating moon rise and set times.
 
 #### 1.5.1 &mdash; May 16, 2014
 
