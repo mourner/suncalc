@@ -13,8 +13,8 @@ var date = new Date('2013-03-05UTC'),
 var testTimes = {
     solarNoon: '2013-03-05T10:10:57Z',
     nadir: '2013-03-04T22:10:57Z',
-    sunrise: '2013-03-05T04:34:57Z',
-    sunset: '2013-03-05T15:46:56Z',
+    sunrise: '2013-03-05T04:34:56Z',
+    sunset: '2013-03-05T15:46:57Z',
     sunriseEnd: '2013-03-05T04:38:19Z',
     sunsetStart: '2013-03-05T15:43:34Z',
     dawn: '2013-03-05T04:02:17Z',
@@ -39,7 +39,7 @@ t.test('getTimes returns sun phases for the given date and location', function (
     var times = SunCalc.getTimes(date, lat, lng);
 
     for (var i in testTimes) {
-        t.equal(times[i].toUTCString(), new Date(testTimes[i]).toUTCString(), i);
+        t.equal(new Date(testTimes[i]).toUTCString(), times[i].toUTCString(), i);
     }
     t.end();
 });
@@ -59,5 +59,13 @@ t.test('getMoonIllumination returns fraction and angle of moon\'s illuminated li
     t.ok(near(moonIllum.fraction, 0.4848068202456373), 'fraction');
     t.ok(near(moonIllum.phase, 0.7548368838538762), 'phase');
     t.ok(near(moonIllum.angle, 1.6732942678578346), 'angle');
+    t.end();
+});
+
+t.test('getMoonTimes returns moon rise and set times', function (t) {
+    var moonTimes = SunCalc.getMoonTimes(date, lat, lng);
+
+    t.equal(moonTimes.rise.toUTCString(), 'Mon, 04 Mar 2013 23:57:55 GMT');
+    t.equal(moonTimes.set.toUTCString(), 'Tue, 05 Mar 2013 08:41:31 GMT');
     t.end();
 });
