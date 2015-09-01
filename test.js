@@ -65,7 +65,11 @@ t.test('getMoonIllumination returns fraction and angle of moon\'s illuminated li
 t.test('getMoonTimes returns moon rise and set times', function (t) {
     var moonTimes = SunCalc.getMoonTimes(date, lat, lng);
 
-    t.equal(moonTimes.rise.toUTCString(), 'Mon, 04 Mar 2013 23:57:55 GMT');
-    t.equal(moonTimes.set.toUTCString(), 'Tue, 05 Mar 2013 08:41:31 GMT');
+    if(moonTimes.rise){
+        t.equal(moonTimes.rise.toUTCString(), 'Mon, 04 Mar 2013 23:57:55 GMT');
+    }
+    if(moonTimes.set){
+        t.equal(moonTimes.set.toUTCString(), 'Tue, 05 Mar 2013 08:41:31 GMT');
+    }
     t.end();
 });
