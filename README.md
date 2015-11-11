@@ -134,7 +134,7 @@ Moon phase value should be interpreted like this:
 ### Moon rise and set times
 
 ```js
-SunCalc.getMoonTimes(/*Date*/ date, /*Number*/ latitude, /*Number*/ longitude)
+SunCalc.getMoonTimes(/*Date*/ date, /*Number*/ latitude, /*Number*/ longitude[, inUTC])
 ```
 
 Returns an object with the following properties:
@@ -144,6 +144,8 @@ Returns an object with the following properties:
  * `alwaysUp`: `true` if the moon never rises/sets and is always _above_ the horizon during the day
  * `alwaysDown`: `true` if the moon is always _below_ the horizon
 
+By default, it will search for moon rise and set during local user's day (frou 0 to 24 hours).
+If `inUTC` is set to true, it will instead search the specified date from 0 to 24 UTC hours.
 
 ## Changelog
 
