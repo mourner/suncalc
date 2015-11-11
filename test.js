@@ -1,6 +1,6 @@
 
 var SunCalc = require('./suncalc'),
-    t = require('tape');
+    t = require('tap');
 
 function near(val1, val2, margin) {
     return Math.abs(val1 - val2) < (margin || 1E-15);
@@ -63,14 +63,10 @@ t.test('getMoonIllumination returns fraction and angle of moon\'s illuminated li
 });
 
 t.test('getMoonTimes returns moon rise and set times', function (t) {
-    var date2 = new Date(date);
-    date2.setHours(0, 0, 0, 0);
-    if (date2.getDate() !== date.getDate()) date2.setDate(date.getDate());
-
-    var moonTimes = SunCalc.getMoonTimes(date2, lat, lng);
+    var moonTimes = SunCalc.getMoonTimes(new Date('2013-03-04UTC'), lat, lng, true);
 
     t.equal(moonTimes.rise.toUTCString(), 'Mon, 04 Mar 2013 23:57:55 GMT');
-    t.equal(moonTimes.set.toUTCString(), 'Tue, 05 Mar 2013 08:41:31 GMT');
+    t.equal(moonTimes.set.toUTCString(), 'Mon, 04 Mar 2013 07:28:41 GMT');
 
     t.end();
 });

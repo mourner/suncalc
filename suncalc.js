@@ -237,9 +237,10 @@ function hoursLater(date, h) {
 
 // calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
 
-SunCalc.getMoonTimes = function (date, lat, lng) {
+SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
     var t = new Date(date);
-    t.setHours(0, 0, 0, 0);
+    if (inUTC) t.setUTCHours(0, 0, 0, 0);
+    else t.setHours(0, 0, 0, 0);
 
     var hc = 0.133 * rad,
         h0 = SunCalc.getMoonPosition(t, lat, lng).altitude - hc,
