@@ -21,13 +21,26 @@
   },
   "main": "suncalc.js",
   "devDependencies": {
-    "tape": "^2.12.3",
-    "jshint": "^2.5.0",
-    "faucet": "0.0.1"
+    "eslint": "^1.9.0",
+    "eslint-config-mourner": "^1.0.1",
+    "tap": "^2.2.0"
+  },
+  "eslintConfig": {
+    "extends": "mourner",
+    "rules": {
+      "indent": 0,
+      "array-bracket-spacing": 0,
+      "strict": 0,
+      "brace-style": 0
+    },
+    "env": {
+      "amd": true
+    }
   },
   "scripts": {
-    "test": "jshint suncalc.js test.js && node test.js | faucet",
-    "cov": "istanbul cover test.js -x test.js"
+    "pretest": "eslint suncalc.js test.js",
+    "test": "tap test.js",
+    "cov": "tap test.js --cov"
   },
   "jshintConfig": {
     "quotmark": "single",
