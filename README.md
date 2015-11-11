@@ -2,6 +2,8 @@
 SunCalc
 =======
 
+[![Build Status](https://travis-ci.org/mourner/suncalc.svg?branch=master)](https://travis-ci.org/mourner/suncalc)
+
 SunCalc is a tiny BSD-licensed JavaScript library for calculating sun position,
 sunlight phases (times for sunrise, sunset, dusk, etc.),
 moon position and lunar phase for the given location and time,
@@ -148,6 +150,10 @@ By default, it will search for moon rise and set during local user's day (frou 0
 If `inUTC` is set to true, it will instead search the specified date from 0 to 24 UTC hours.
 
 ## Changelog
+
+#### 1.7.0 &mdash; Nov 11, 2015
+
+- Added `inUTC` argument to `getMoonTimes`.
 
 #### 1.6.0 &mdash; Oct 27, 2014
 
