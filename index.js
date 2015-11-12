@@ -8,41 +8,16 @@ exports.getMoonTimes = getMoonTimes;
 exports.getMoonIllumination = getMoonIllumination;
 
 var julian = require('./src/julian');
+var pos = require('./src/pos');
 
 // shortcuts for easier to read formulas
 
 var sin  = Math.sin,
     cos  = Math.cos,
     tan  = Math.tan,
-    asin = Math.asin,
     atan = Math.atan2,
     acos = Math.acos,
     rad  = Math.PI / 180;
-
-// sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
-
-// general calculations for position
-
-var e = rad * 23.4397; // obliquity of the Earth
-
-function rightAscension(l, b) {
-    return atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l));
-}
-function declination(l, b) {
-    return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l));
-}
-
-function azimuth(H, phi, dec) {
-    return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi));
-}
-function altitude(H, phi, dec) {
-    return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H));
-}
-
-function siderealTime(d, lw) {
-    return rad * (280.16 + 360.9856235 * d) - lw;
-}
-
 
 // general sun calculations
 
@@ -64,8 +39,8 @@ function sunCoords(d) {
         L = eclipticLongitude(M);
 
     return {
-        dec: declination(L, 0),
-        ra: rightAscension(L, 0)
+        dec: pos.declination(L, 0),
+        ra: pos.rightAscension(L, 0)
     };
 }
 
@@ -79,11 +54,11 @@ function getSunPosition(date, lat, lng) {
         d   = julian.to(date),
 
         c  = sunCoords(d),
-        H  = siderealTime(d, lw) - c.ra;
+        H  = pos.siderealTime(d, lw) - c.ra;
 
     return {
-        azimuth: azimuth(H, phi, c.dec),
-        altitude: altitude(H, phi, c.dec)
+        azimuth: pos.azimuth(H, phi, c.dec),
+        altitude: pos.altitude(H, phi, c.dec)
     };
 }
 
@@ -145,7 +120,7 @@ function getSunTimes(date, lat, lng) {
 
         M = solarMeanAnomaly(ds),
         L = eclipticLongitude(M),
-        dec = declination(L, 0),
+        dec = pos.declination(L, 0),
 
         Jnoon = solarTransitJ(ds, M, L),
 
@@ -184,8 +159,8 @@ function moonCoords(d) { // geocentric ecliptic coordinates of the moon
         dt = 385001 - 20905 * cos(M);  // distance to the moon in km
 
     return {
-        ra: rightAscension(l, b),
-        dec: declination(l, b),
+        ra: pos.rightAscension(l, b),
+        dec: pos.declination(l, b),
         dist: dt
     };
 }
@@ -197,14 +172,14 @@ function getMoonPosition(date, lat, lng) {
         d   = julian.to(date),
 
         c = moonCoords(d),
-        H = siderealTime(d, lw) - c.ra,
-        h = altitude(H, phi, c.dec);
+        H = pos.siderealTime(d, lw) - c.ra,
+        h = pos.altitude(H, phi, c.dec);
 
     // altitude correction for refraction
     h = h + rad * 0.017 / tan(h + rad * 10.26 / (h + rad * 5.10));
 
     return {
-        azimuth: azimuth(H, phi, c.dec),
+        azimuth: pos.azimuth(H, phi, c.dec),
         altitude: h,
         distance: c.dist
     };
