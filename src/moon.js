@@ -21,14 +21,12 @@ function moonCoords(d) { // geocentric ecliptic coordinates of the moon
         F = rad * (93.272 + 13.229350 * d),  // mean distance
 
         l  = L + rad * 6.289 * sin(M), // longitude
-        b  = rad * 5.128 * sin(F),     // latitude
-        dt = 385001 - 20905 * cos(M);  // distance to the moon in km
+        b  = rad * 5.128 * sin(F);     // latitude
 
-    return {
-        ra: pos.rightAscension(l, b),
-        dec: pos.declination(l, b),
-        dist: dt
-    };
+    var coords = pos.coords(l, b);
+    coords.dist = 385001 - 20905 * cos(M); // distance to the moon in km
+
+    return coords;
 }
 
 function moonPosition(date, lat, lng) {
@@ -38,17 +36,16 @@ function moonPosition(date, lat, lng) {
         d   = julian.to(date),
 
         c = moonCoords(d),
-        H = pos.siderealTime(d, lw) - c.ra,
-        h = pos.altitude(H, phi, c.dec);
+        H = pos.siderealTime(d, lw) - c.ra;
+
+    var position = pos.pos(H, phi, c.dec);
+    position.distance = c.dist;
 
     // altitude correction for refraction
-    h = h + rad * 0.017 / Math.tan(h + rad * 10.26 / (h + rad * 5.10));
+    var h = position.altitude;
+    position.altitude = h + rad * 0.017 / Math.tan(h + rad * 10.26 / (h + rad * 5.10));
 
-    return {
-        azimuth: pos.azimuth(H, phi, c.dec),
-        altitude: h,
-        distance: c.dist
-    };
+    return position;
 }
 
 

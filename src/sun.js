@@ -28,14 +28,7 @@ function eclipticLongitude(M) {
 }
 
 function sunCoords(d) {
-
-    var M = solarMeanAnomaly(d),
-        L = eclipticLongitude(M);
-
-    return {
-        dec: pos.declination(L, 0),
-        ra: pos.rightAscension(L, 0)
-    };
+    return pos.coords(eclipticLongitude(solarMeanAnomaly(d)), 0);
 }
 
 
@@ -50,10 +43,7 @@ function getSunPosition(date, lat, lng) {
         c  = sunCoords(d),
         H  = pos.siderealTime(d, lw) - c.ra;
 
-    return {
-        azimuth: pos.azimuth(H, phi, c.dec),
-        altitude: pos.altitude(H, phi, c.dec)
-    };
+    return pos.pos(H, phi, c.dec);
 }
 
 
