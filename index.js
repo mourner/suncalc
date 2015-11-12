@@ -7,6 +7,8 @@ exports.getMoonPosition = getMoonPosition;
 exports.getMoonTimes = getMoonTimes;
 exports.getMoonIllumination = getMoonIllumination;
 
+var julian = require('./src/julian');
+
 // shortcuts for easier to read formulas
 
 var sin  = Math.sin,
@@ -18,26 +20,6 @@ var sin  = Math.sin,
     rad  = Math.PI / 180;
 
 // sun calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
-
-
-// date/time constants and conversions
-
-var dayMs = 1000 * 60 * 60 * 24,
-    J1970 = 2440588,
-    J2000 = 2451545;
-
-function toJulian(date) {
-    return date.valueOf() / dayMs - 0.5 + J1970;
-}
-
-function fromJulian(j)  {
-    return new Date((j + 0.5 - J1970) * dayMs);
-}
-
-function toDays(date) {
-    return toJulian(date) - J2000;
-}
-
 
 // general calculations for position
 
@@ -94,7 +76,7 @@ function getSunPosition(date, lat, lng) {
 
     var lw  = rad * -lng,
         phi = rad * lat,
-        d   = toDays(date),
+        d   = julian.to(date),
 
         c  = sunCoords(d),
         H  = siderealTime(d, lw) - c.ra;
@@ -135,7 +117,7 @@ function approxTransit(Ht, lw, n) {
     return J0 + (Ht + lw) / (2 * Math.PI) + n;
 }
 function solarTransitJ(ds, M, L) {
-    return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L);
+    return ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L);
 }
 function hourAngle(h, phi, d) {
     return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d)));
@@ -157,7 +139,7 @@ function getSunTimes(date, lat, lng) {
     var lw = rad * -lng,
         phi = rad * lat,
 
-        d = toDays(date),
+        d = julian.to(date),
         n = julianCycle(d, lw),
         ds = approxTransit(0, lw, n),
 
@@ -171,8 +153,8 @@ function getSunTimes(date, lat, lng) {
 
 
     var result = {
-        solarNoon: fromJulian(Jnoon),
-        nadir: fromJulian(Jnoon - 0.5)
+        solarNoon: julian.from(Jnoon),
+        nadir: julian.from(Jnoon - 0.5)
     };
 
     for (i = 0, len = times.length; i < len; i += 1) {
@@ -181,8 +163,8 @@ function getSunTimes(date, lat, lng) {
         Jset = getSetJ(time[0] * rad, lw, phi, dec, n, M, L);
         Jrise = Jnoon - (Jset - Jnoon);
 
-        result[time[1]] = fromJulian(Jrise);
-        result[time[2]] = fromJulian(Jset);
+        result[time[1]] = julian.from(Jrise);
+        result[time[2]] = julian.from(Jset);
     }
 
     return result;
@@ -212,7 +194,7 @@ function getMoonPosition(date, lat, lng) {
 
     var lw  = rad * -lng,
         phi = rad * lat,
-        d   = toDays(date),
+        d   = julian.to(date),
 
         c = moonCoords(d),
         H = siderealTime(d, lw) - c.ra,
@@ -235,7 +217,7 @@ function getMoonPosition(date, lat, lng) {
 
 function getMoonIllumination(date) {
 
-    var d = toDays(date),
+    var d = julian.to(date),
         s = sunCoords(d),
         m = moonCoords(d),
 
@@ -253,12 +235,11 @@ function getMoonIllumination(date) {
     };
 }
 
+// calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
 
 function hoursLater(date, h) {
-    return new Date(date.valueOf() + h * dayMs / 24);
+    return new Date(date.valueOf() + h * 1000 * 60 * 60);
 }
-
-// calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
 
 function getMoonTimes(date, lat, lng, inUTC) {
     var t = new Date(date);
