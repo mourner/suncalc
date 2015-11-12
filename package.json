@@ -19,8 +19,7 @@
   "eslintConfig": {
     "extends": "mourner",
     "rules": {
-      "array-bracket-spacing": 0,
-      "brace-style": 0
+      "array-bracket-spacing": 0
     }
   },
   "homepage": "https://github.com/mourner/suncalc",
