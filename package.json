@@ -2,12 +2,12 @@
   "name": "suncalc",
   "version": "1.7.0",
   "description": "A tiny JavaScript library for calculating sun/moon positions and phases.",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "pretest": "eslint index.js test.js",
+    "pretest": "eslint src test.js",
     "test": "tap test.js",
     "cov": "tap test.js --cov",
-    "build": "browserify -s suncalc index.js > suncalc.js",
+    "build": "browserify -s suncalc src/index.js > suncalc.js",
     "prepublish": "npm run build"
   },
   "devDependencies": {

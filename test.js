@@ -1,6 +1,6 @@
 'use strict';
 
-var SunCalc = require('./'),
+var SunCalc = require('./src'),
     t = require('tap');
 
 function near(val1, val2, margin) {
