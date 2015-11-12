@@ -84,7 +84,7 @@ function getSunPosition(date, lat, lng) {
         azimuth: azimuth(H, phi, c.dec),
         altitude: altitude(H, phi, c.dec)
     };
-};
+}
 
 
 // sun times configuration (angle, morning name, evening name)
@@ -102,7 +102,7 @@ var times = exports.times = [
 
 function addSunTime(angle, riseName, setName) {
     times.push([angle, riseName, setName]);
-};
+}
 
 
 // calculations for sun times
@@ -161,7 +161,7 @@ function getSunTimes(date, lat, lng) {
     }
 
     return result;
-};
+}
 
 
 // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
@@ -201,7 +201,7 @@ function getMoonPosition(date, lat, lng) {
         altitude: h,
         distance: c.dist
     };
-};
+}
 
 
 // calculations for illumination parameters of the moon,
@@ -226,7 +226,7 @@ function getMoonIllumination(date) {
         phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
         angle: angle
     };
-};
+}
 
 
 function hoursLater(date, h) {
@@ -287,4 +287,4 @@ function getMoonTimes(date, lat, lng, inUTC) {
     if (!rise && !set) result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
 
     return result;
-};
+}

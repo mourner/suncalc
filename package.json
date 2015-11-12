@@ -4,7 +4,7 @@
   "description": "A tiny JavaScript library for calculating sun/moon positions and phases.",
   "main": "index.js",
   "scripts": {
-    "pretest": "eslint suncalc.js test.js",
+    "pretest": "eslint index.js test.js",
     "test": "tap test.js",
     "cov": "tap test.js --cov",
     "build": "browserify -s suncalc index.js > suncalc.js",
