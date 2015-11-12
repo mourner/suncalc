@@ -1,3 +1,4 @@
+'use strict';
 
 var SunCalc = require('./'),
     t = require('tap');
@@ -41,6 +42,7 @@ t.test('getTimes returns sun phases for the given date and location', function (
     for (var i in testTimes) {
         t.equal(new Date(testTimes[i]).toUTCString(), times[i].toUTCString(), i);
     }
+    t.ok(SunCalc.times);
     t.end();
 });
 
