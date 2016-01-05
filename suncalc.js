@@ -193,7 +193,9 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
 
         c = moonCoords(d),
         H = siderealTime(d, lw) - c.ra,
-        h = altitude(H, phi, c.dec);
+        h = altitude(H, phi, c.dec),
+        // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
+        pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
 
     // altitude correction for refraction
     h = h + rad * 0.017 / tan(h + rad * 10.26 / (h + rad * 5.10));
@@ -201,7 +203,8 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
     return {
         azimuth: azimuth(H, phi, c.dec),
         altitude: h,
-        distance: c.dist
+        distance: c.dist,
+        parallacticAngle: pa
     };
 };
 
