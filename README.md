@@ -105,6 +105,7 @@ Returns an object with the following properties:
  * `altitude`: moon altitude above the horizon in radians
  * `azimuth`: moon azimuth in radians
  * `distance`: distance to moon in kilometers
+ * `parallacticAngle`: parallactic angle of the moon in radians
 
 
 ### Moon illumination
@@ -132,6 +133,9 @@ Moon phase value should be interpreted like this:
 |       | Waning Gibbous  |
 | 0.75  | Last Quarter    |
 |       | Waning Crescent |
+
+By subtracting the `parallacticAngle` from the `angle` one can get the zenith angle of the moons bright limb (anticlockwise).
+The zenith angle can be used do draw the moon shape from the observers perspective (e.g. moon lying on its back). 
 
 ### Moon rise and set times
 
