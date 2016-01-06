@@ -38,7 +38,7 @@ var e = rad * 23.4397; // obliquity of the Earth
 function rightAscension(l, b) { return atan(sin(l) * cos(e) - tan(b) * sin(e), cos(l)); }
 function declination(l, b)    { return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l)); }
 
-function azimuth(H, phi, dec)  { return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi)); }
+function azimuth(H, phi, dec)  { return PI + atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi)); }
 function altitude(H, phi, dec) { return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H)); }
 
 function siderealTime(d, lw) { return rad * (280.16 + 360.9856235 * d) - lw; }
