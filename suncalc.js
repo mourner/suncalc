@@ -43,12 +43,12 @@ function altitude(H, phi, dec) { return asin(sin(phi) * sin(dec) + cos(phi) * co
 
 function siderealTime(d, lw) { return rad * (280.16 + 360.9856235 * d) - lw; }
 
-function astroRefraction(h) {         
+function astroRefraction(h) {
     if (h < 0) // the following formula works for positive altitudes only.
-        h = 0; // if h = -0.08901179 a div/0 would occur. 
+        h = 0; // if h = -0.08901179 a div/0 would occur.
 
     // formula 16.4 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-    // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad: 
+    // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
     return 0.0002967  / Math.tan(h + 0.00312536 / (h + 0.08901179));
 }
 
@@ -206,7 +206,7 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
         pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
 
     h = h + astroRefraction(h); // altitude correction for refraction
-	
+
     return {
         azimuth: azimuth(H, phi, c.dec),
         altitude: h,
