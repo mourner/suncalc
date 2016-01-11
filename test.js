@@ -48,7 +48,7 @@ t.test('getMoonPosition returns moon position data given time and location', fun
     var moonPos = SunCalc.getMoonPosition(date, lat, lng);
 
     t.ok(near(moonPos.azimuth, -0.9783999522438226), 'azimuth');
-    t.ok(near(moonPos.altitude, 0.006969727754891917), 'altitude');
+    t.ok(near(moonPos.altitude, 0.014551482243892251), 'altitude');
     t.ok(near(moonPos.distance, 364121.37256256194), 'distance');
     t.end();
 });
@@ -65,8 +65,8 @@ t.test('getMoonIllumination returns fraction and angle of moon\'s illuminated li
 t.test('getMoonTimes returns moon rise and set times', function (t) {
     var moonTimes = SunCalc.getMoonTimes(new Date('2013-03-04UTC'), lat, lng, true);
 
-    t.equal(moonTimes.rise.toUTCString(), 'Mon, 04 Mar 2013 23:57:55 GMT');
-    t.equal(moonTimes.set.toUTCString(), 'Mon, 04 Mar 2013 07:28:41 GMT');
+    t.equal(moonTimes.rise.toUTCString(), 'Mon, 04 Mar 2013 23:54:29 GMT');
+    t.equal(moonTimes.set.toUTCString(), 'Mon, 04 Mar 2013 07:47:58 GMT');
 
     t.end();
 });
