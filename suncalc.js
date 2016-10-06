@@ -124,7 +124,7 @@ function julianCycle(d, lw) { return Math.round(d - J0 - lw / (2 * PI)); }
 function approxTransit(Ht, lw, n) { return J0 + (Ht + lw) / (2 * PI) + n; }
 function solarTransitJ(ds, M, L)  { return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L); }
 
-function hourAngle(h, phi, d) { return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d))); }
+function hourAngle(h, phi, d) { return acos(Math.max(-1,Math.min(1,(sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d))))); }
 
 // returns set time for the given sun altitude
 function getSetJ(h, lw, phi, dec, n, M, L) {
