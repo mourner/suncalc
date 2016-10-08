@@ -222,8 +222,7 @@ SunCalc.getMoonPosition = function (date, lat, lng) {
 
 SunCalc.getMoonIllumination = function (date) {
 
-    var date = date || new Date(),
-        d = toDays(date),
+    var d = toDays(date || new Date()),
         s = sunCoords(d),
         m = moonCoords(d),
 
