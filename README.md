@@ -135,7 +135,7 @@ Moon phase value should be interpreted like this:
 |       | Waning Crescent |
 
 By subtracting the `parallacticAngle` from the `angle` one can get the zenith angle of the moons bright limb (anticlockwise).
-The zenith angle can be used do draw the moon shape from the observers perspective (e.g. moon lying on its back). 
+The zenith angle can be used do draw the moon shape from the observers perspective (e.g. moon lying on its back).
 
 ### Moon rise and set times
 
@@ -154,6 +154,13 @@ By default, it will search for moon rise and set during local user's day (frou 0
 If `inUTC` is set to true, it will instead search the specified date from 0 to 24 UTC hours.
 
 ## Changelog
+
+#### 1.8.0 &mdash; Dec 22, 2016
+
+- Improved precision of moonrise/moonset calculations.
+- Added `parallacticAngle` calculation to `getMoonPosition`.
+- Default to today's date in `getMoonIllumination`.
+- Fixed incompatibility when using Browserify/Webpack together with a global AMD loader.
 
 #### 1.7.0 &mdash; Nov 11, 2015
 
