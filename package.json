@@ -21,9 +21,9 @@
   },
   "main": "suncalc.js",
   "devDependencies": {
-    "eslint": "^1.9.0",
-    "eslint-config-mourner": "^1.0.1",
-    "tap": "^2.2.0"
+    "eslint": "^3.12.2",
+    "eslint-config-mourner": "^2.0.1",
+    "tap": "^8.0.1"
   },
   "eslintConfig": {
     "extends": "mourner",
