@@ -63,8 +63,8 @@ Returns an object with the following properties (each is a `Date` object):
 | `goldenHour`    | evening golden hour starts                                               |
 | `sunsetStart`   | sunset starts (bottom edge of the sun touches the horizon)               |
 | `sunset`        | sunset (sun disappears below the horizon, evening civil twilight starts) |
-| `dusk`          | dusk (evening nautical twilight starts)                                  |
-| `nauticalDusk`  | nautical dusk (evening astronomical twilight starts)                     |
+| `dusk`          | dusk (evening astronomical twilight starts)                                  |
+| `nauticalDusk`  | nautical dusk (evening nautical twilight starts)                     |
 | `night`         | night starts (dark enough for astronomical observations)                 |
 | `nadir`         | nadir (darkest moment of the night, sun is in the lowest position)       |
 | `nightEnd`      | night ends (morning astronomical twilight starts)                        |
