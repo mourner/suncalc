@@ -70,8 +70,8 @@ function sunCoords(d) {
         L = eclipticLongitude(M);
 
     return {
-        dec: declination(L, 0),
-        ra: rightAscension(L, 0)
+        ra: rightAscension(L, 0),
+        dec: declination(L, 0)
     };
 }
 

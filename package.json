@@ -38,7 +38,7 @@
     }
   },
   "scripts": {
-    "pretest": "eslint suncalc.js test.js",
+    "pretest": "eslint suncalc.js meeus.js test.js",
     "test": "tap test.js",
     "cov": "tap test.js --cov"
   },
