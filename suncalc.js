@@ -27,6 +27,35 @@ var dayMs = 1000 * 60 * 60 * 24,
     J2000 = 2451545;
 
 function toJulian(date) { return date.valueOf() / dayMs - 0.5 + J1970; }
+//Creates less precise toDays functions for day of suntimes.
+function toLessPreciseDays(date){
+   var month = date.getMonth() + 1;
+   var day = date.getDate();
+   var year = date.getFullYear();
+
+   var gregorian = (year < 1583) ? false : true;
+
+   if ((month === 1) || (month === 2))
+   {
+        year = year - 1;
+        month = month + 12;
+   }
+
+        var a = Math.trunc(year / 100);
+        var b = 0;
+
+        if (gregorian)
+            b = 2 - a + Math.trunc(a / 4);
+        else
+            b = 0.0;
+
+        var jd = Math.trunc(365.25 * (year + 4716))
+                   + Math.trunc(30.6001 * (month + 1))
+                   + day + b - 1524.5;
+
+        return jd -J2000 +.5;
+}
+              
 function fromJulian(j)  { return new Date((j + 0.5 - J1970) * dayMs); }
 function toDays(date)   { return toJulian(date) - J2000; }
 
@@ -142,7 +171,7 @@ SunCalc.getTimes = function (date, lat, lng) {
     var lw = rad * -lng,
         phi = rad * lat,
 
-        d = toDays(date),
+        d = toLessPreciseDays(date),
         n = julianCycle(d, lw),
         ds = approxTransit(0, lw, n),
 
