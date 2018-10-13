@@ -70,3 +70,20 @@ t.test('getMoonTimes returns moon rise and set times', function (t) {
 
     t.end();
 });
+
+t.test('getTimes day detection works with a variety of date times', function (t) {
+    var latitude = 47.606209;
+    var longitude = -122.332069;
+    var targetDay = 4;
+    var dateStrings = [
+        'Mon, 04 Mar 2013 00:00:01 PDT',
+        'Mon, 04 Mar 2013 12:00:00 PDT',
+        'Mon, 04 Mar 2013 23:59:59 PDT'
+    ];
+    for (var i = 0, l = dateStrings.length; i < l; i++) {
+        var dateString = dateStrings[i];
+        var date = new Date(dateString);
+        var times = SunCalc.getTimes(date, latitude, longitude);
+        t.equal(times.solarNoon.getDate(), targetDay, dateString);
+    }
+});
