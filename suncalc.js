@@ -157,7 +157,7 @@ SunCalc.getTimes = function (date, lat, lng) {
 
     var result = {
         solarNoon: fromJulian(Jnoon),
-        nadir: fromJulian(Jnoon - 0.5)
+        nadir: fromJulian(Jnoon + 0.5)
     };
 
     for (i = 0, len = times.length; i < len; i += 1) {
