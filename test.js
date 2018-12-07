@@ -12,7 +12,7 @@ var date = new Date('2013-03-05UTC'),
 
 var testTimes = {
     solarNoon: '2013-03-05T10:10:57Z',
-    nadir: '2013-03-04T22:10:57Z',
+    nadir: '2013-03-05T22:10:57Z',
     sunrise: '2013-03-05T04:34:56Z',
     sunset: '2013-03-05T15:46:57Z',
     sunriseEnd: '2013-03-05T04:38:19Z',
