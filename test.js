@@ -80,7 +80,7 @@ t.test('getTimes day detection works with a variety of date times', function (t)
         'Mon, 04 Mar 2013 12:00:00 PDT',
         'Mon, 04 Mar 2013 23:59:59 PDT'
     ];
-    for (var i = 0, l = dateStrings.length; i < l; i++) {
+    for (var i = 0, l = testDateStrings.length; i < l; i++) {
         var times = SunCalc.getTimes(new Date(testDateStrings[i]), lat, lng);
         t.equal(times.solarNoon.getDate(), testDateDay, testDateStrings[i]);
     }
