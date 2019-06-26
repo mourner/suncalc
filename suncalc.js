@@ -180,6 +180,30 @@ SunCalc.getTimes = function (date, lat, lng, height) {
     return result;
 };
 
+SunCalc.getTimesAtAltitude = function (date, altitude, lat, lng) {
+
+    var lw = rad * -lng,
+        phi = rad * lat,
+
+        d = toDays(date),
+        n = julianCycle(d, lw),
+        ds = approxTransit(0, lw, n),
+
+        M = solarMeanAnomaly(ds),
+        L = eclipticLongitude(M),
+        dec = declination(L, 0),
+
+        Jnoon = solarTransitJ(ds, M, L),
+
+        Jset = getSetJ(altitude * rad, lw, phi, dec, n, M, L),
+        Jrise = Jnoon - (Jset - Jnoon);
+
+    return {
+        rise: fromJulian(Jrise),
+        set: fromJulian(Jset),
+    };
+};
+
 
 // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 

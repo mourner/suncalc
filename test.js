@@ -61,6 +61,13 @@ t.test('getTimes adjusts sun phases when additionally given the observer height'
     t.end();
 });
 
+t.test('getTimesAtAltitude returns the correct time for the given date and location', function (t) {
+    var times = SunCalc.getTimesAtAltitude(date, -6, lat, lng);
+
+    t.equal(new Date(testTimes.dawn).toUTCString(), times.rise.toUTCString());
+    t.end();
+});
+
 t.test('getMoonPosition returns moon position data given time and location', function (t) {
     var moonPos = SunCalc.getMoonPosition(date, lat, lng);
 
