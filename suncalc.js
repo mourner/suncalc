@@ -125,6 +125,7 @@ function approxTransit(Ht, lw, n) { return J0 + (Ht + lw) / (2 * PI) + n; }
 function solarTransitJ(ds, M, L)  { return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L); }
 
 function hourAngle(h, phi, d) { return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d))); }
+function observerAngle(height) { return -2.076 * Math.sqrt(height) / 60; }
 
 // returns set time for the given sun altitude
 function getSetJ(h, lw, phi, dec, n, M, L) {
@@ -135,12 +136,17 @@ function getSetJ(h, lw, phi, dec, n, M, L) {
 }
 
 
-// calculates sun times for a given date and latitude/longitude
+// calculates sun times for a given date, latitude/longitude, and, optionally,
+// the observer height (in meters) relative to the horizon
 
-SunCalc.getTimes = function (date, lat, lng) {
+SunCalc.getTimes = function (date, lat, lng, height) {
+
+    height = height || 0;
 
     var lw = rad * -lng,
         phi = rad * lat,
+
+        dh = observerAngle(height),
 
         d = toDays(date),
         n = julianCycle(d, lw),
@@ -152,7 +158,7 @@ SunCalc.getTimes = function (date, lat, lng) {
 
         Jnoon = solarTransitJ(ds, M, L),
 
-        i, len, time, Jset, Jrise;
+        i, len, time, h0, Jset, Jrise;
 
 
     var result = {
@@ -162,8 +168,9 @@ SunCalc.getTimes = function (date, lat, lng) {
 
     for (i = 0, len = times.length; i < len; i += 1) {
         time = times[i];
+        h0 = (time[0] + dh) * rad;
 
-        Jset = getSetJ(time[0] * rad, lw, phi, dec, n, M, L);
+        Jset = getSetJ(h0, lw, phi, dec, n, M, L);
         Jrise = Jnoon - (Jset - Jnoon);
 
         result[time[1]] = fromJulian(Jrise);
