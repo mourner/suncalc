@@ -8,7 +8,8 @@ function near(val1, val2, margin) {
 
 var date = new Date('2013-03-05UTC'),
     lat = 50.5,
-    lng = 30.5;
+    lng = 30.5,
+    height = 2000;
 
 var testTimes = {
     solarNoon: '2013-03-05T10:10:57Z',
@@ -27,6 +28,13 @@ var testTimes = {
     goldenHour: '2013-03-05T15:02:52Z'
 };
 
+var heightTestTimes = {
+    solarNoon: '2013-03-05T10:10:57Z',
+    nadir: '2013-03-04T22:10:57Z',
+    sunrise: '2013-03-05T04:25:07Z',
+    sunset: '2013-03-05T15:56:46Z'
+};
+
 t.test('getPosition returns azimuth and altitude for the given time and location', function (t) {
     var sunPos = SunCalc.getPosition(date, lat, lng);
 
@@ -40,6 +48,15 @@ t.test('getTimes returns sun phases for the given date and location', function (
 
     for (var i in testTimes) {
         t.equal(new Date(testTimes[i]).toUTCString(), times[i].toUTCString(), i);
+    }
+    t.end();
+});
+
+t.test('getTimes adjusts sun phases when additionally given the observer height', function (t) {
+    var times = SunCalc.getTimes(date, lat, lng, height);
+
+    for (var i in heightTestTimes) {
+        t.equal(new Date(heightTestTimes[i]).toUTCString(), times[i].toUTCString(), i);
     }
     t.end();
 });

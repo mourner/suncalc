@@ -49,7 +49,7 @@ var SunCalc = require('suncalc');
 ### Sunlight times
 
 ```javascript
-SunCalc.getTimes(/*Date*/ date, /*Number*/ latitude, /*Number*/ longitude)
+SunCalc.getTimes(/*Date*/ date, /*Number*/ latitude, /*Number*/ longitude, /*Number (default=0)*/ height)
 ```
 
 Returns an object with the following properties (each is a `Date` object):
