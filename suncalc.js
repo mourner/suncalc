@@ -307,7 +307,75 @@ SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
 
     return result;
 };
+              
+function calcMoonTransit(rize, set) {
+    if (rize > set) {
+        return new Date(set.getTime() + (rize - set) / 2);
+    } else {
+        return new Date(rize.getTime() + (set - rize) / 2);
+    }
+}
 
+function mainMoonTransit(rise, set, lat, lng) {
+    var main = "",
+        day = set.getDate(),
+        tempTransitBefore,
+        tempTransitAfter;
+
+    if ((rise && set) && (rise < set)) {
+        main = calcMoonTransit(rise, set);
+    } else {
+        if (rise) {
+            tempTransitAfter = calcMoonTransit(rise, SunCalc.getMoonTimes(new Date(rise).setDate(day + 1), lat, lng).set);
+            if (tempTransitAfter.getDate() === day) {
+                main = tempTransitAfter;
+            }
+        }
+
+        if (set) {
+            tempTransitBefore = calcMoonTransit(set, SunCalc.getMoonTimes(new Date(set).setDate(day - 1), lat, lng).rise);
+            if (tempTransitBefore.getDate() === day) {
+                main = tempTransitBefore;
+            }
+        }
+    }
+    return main;
+}
+
+function invertMoonTransit(rise, set, lat, lng) {
+    var invert = "",
+        day = set.getDate(),
+        tempTransitBefore,
+        tempTransitAfter;
+
+    if ((rise && set) && (set < rise)) {
+        invert = calcMoonTransit(rise, set);
+    } else {
+        if (rise) {
+            tempTransitBefore = calcMoonTransit(rise, SunCalc.getMoonTimes(new Date(rise).setDate(day - 1), lat, lng).set);
+            if (tempTransitBefore.getDate() === day) {
+                invert = tempTransitBefore;
+            }
+        }
+
+        if (set) {
+            tempTransitAfter = calcMoonTransit(set, SunCalc.getMoonTimes(new Date(set).setDate(day + 1), lat, lng).rise);
+            if (tempTransitAfter.getDate() === day) {
+                invert = tempTransitAfter;
+            }
+        }
+    }
+
+    return invert;
+}
+
+SunCalc.moonTransit = function (rise, set, lat, lng) {
+    var transit = {};
+
+    transit.main = mainMoonTransit(rise, set, lat, lng);
+    transit.invert = invertMoonTransit(rise, set, lat, lng);
+    return transit;
+};
 
 // export as Node module / AMD module / browser variable
 if (typeof exports === 'object' && typeof module !== 'undefined') module.exports = SunCalc;
