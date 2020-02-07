@@ -180,10 +180,14 @@ SunCalc.getTimes = function (date, lat, lng, height) {
     return result;
 };
 
-SunCalc.getRiseAndSetAtSolarAngle = function (date, angle, lat, lng) {
+SunCalc.getRiseAndSetAtSolarAngle = function (date, angle, lat, lng, elevation) {
+
+    elevation = elevation || 0;
 
     var lw = rad * -lng,
         phi = rad * lat,
+
+        dh = observerAngle(elevation),
 
         d = toDays(date),
         n = julianCycle(d, lw),
@@ -194,8 +198,9 @@ SunCalc.getRiseAndSetAtSolarAngle = function (date, angle, lat, lng) {
         dec = declination(L, 0),
 
         Jnoon = solarTransitJ(ds, M, L),
+        h0 = (angle - 0.833 + dh) * rad,
 
-        Jset = getSetJ((angle - 0.833) * rad, lw, phi, dec, n, M, L),
+        Jset = getSetJ(h0, lw, phi, dec, n, M, L),
         Jrise = Jnoon - (Jset - Jnoon);
 
     return {

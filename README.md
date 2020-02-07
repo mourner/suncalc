@@ -80,11 +80,11 @@ Adds a custom time when the sun reaches the given angle to results returned by `
 `SunCalc.times` property contains all currently defined times.
 
 ```javascript
-SunCalc.getRiseAndSetAtSolarAngle(/*Date*/ timeAndDate, /*Number*/ angle, /*Number*/ latitude, /*Number*/ longitude)
+SunCalc.getRiseAndSetAtSolarAngle(/*Date*/ timeAndDate, /*Number*/ angle, /*Number*/ latitude, /*Number*/ longitude, /*Number (default=0)*/ elevation)
 ```
 
 Returns an object containing the times at which the sun will reach the given angle at the given
-location. The object contains the following properties (each is a `Date` object):
+location and elevation. The object contains the following properties (each is a `Date` object):
 
 | Property        | Description                                                              |
 | --------------- | ------------------------------------------------------------------------ |
