@@ -61,8 +61,8 @@ t.test('getTimes adjusts sun phases when additionally given the observer height'
     t.end();
 });
 
-t.test('getTimesAtAltitude returns the correct time for the given date and location', function (t) {
-    var times = SunCalc.getTimesAtAltitude(date, 0, lat, lng);
+t.test('getRiseAndSetAtSolarAngle returns the correct time for the given date and location', function (t) {
+    var times = SunCalc.getRiseAndSetAtSolarAngle(date, 0, lat, lng);
 
     t.equal(new Date(times.rise).toString(), new Date(testTimes.sunrise).toString());
     t.equal(times.set.toString(), new Date(testTimes.sunset).toString());

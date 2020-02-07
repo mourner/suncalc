@@ -180,7 +180,7 @@ SunCalc.getTimes = function (date, lat, lng, height) {
     return result;
 };
 
-SunCalc.getTimesAtAltitude = function (date, altitude, lat, lng) {
+SunCalc.getRiseAndSetAtSolarAngle = function (date, angle, lat, lng) {
 
     var lw = rad * -lng,
         phi = rad * lat,
@@ -195,7 +195,7 @@ SunCalc.getTimesAtAltitude = function (date, altitude, lat, lng) {
 
         Jnoon = solarTransitJ(ds, M, L),
 
-        Jset = getSetJ((altitude - 0.833) * rad, lw, phi, dec, n, M, L),
+        Jset = getSetJ((angle - 0.833) * rad, lw, phi, dec, n, M, L),
         Jrise = Jnoon - (Jset - Jnoon);
 
     return {
