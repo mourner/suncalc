@@ -195,7 +195,7 @@ SunCalc.getTimesAtAltitude = function (date, altitude, lat, lng) {
 
         Jnoon = solarTransitJ(ds, M, L),
 
-        Jset = getSetJ(altitude * rad, lw, phi, dec, n, M, L),
+        Jset = getSetJ((altitude - 0.833) * rad, lw, phi, dec, n, M, L),
         Jrise = Jnoon - (Jset - Jnoon);
 
     return {
