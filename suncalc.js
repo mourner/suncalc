@@ -180,6 +180,16 @@ SunCalc.getTimes = function (date, lat, lng, height) {
     return result;
 };
 
+/**
+ * Get the time at which the sun will have a given apparent angle when rising and when setting.
+ *
+ * @param {Date} date The date to get the times for. Only the date part is important.
+ * @param {number} angle The angle of the sun relative to the Earth's horizon.
+ * @param {number} lat The latitude.
+ * @param {number} lng The longitude.
+ * @param {number} [elevation=0] The elevation of the observer in meters.
+ * @return {{set: Date, rise: Date}}
+ */
 SunCalc.getRiseAndSetAtSolarAngle = function (date, angle, lat, lng, elevation) {
 
     elevation = elevation || 0;
