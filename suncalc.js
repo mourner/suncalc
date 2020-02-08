@@ -180,6 +180,46 @@ SunCalc.getTimes = function (date, lat, lng, height) {
     return result;
 };
 
+/**
+ * Get the time at which the sun will have a given apparent angle when rising and when setting.
+ *
+ * @param {Date} date The date to get the times for. Only the date part is important.
+ * @param {number} angle The angle of the sun relative to the Earth's horizon.
+ * @param {number} lat The latitude.
+ * @param {number} lng The longitude.
+ * @param {number} [elevation=0] The elevation of the observer in meters.
+ * @return {{set: Date, rise: Date}}
+ */
+SunCalc.getRiseAndSetAtSolarAngle = function (date, angle, lat, lng, elevation) {
+
+    elevation = elevation || 0;
+    angle = angle - astroRefraction(angle) * 100;
+
+    var lw = rad * -lng,
+        phi = rad * lat,
+
+        dh = observerAngle(elevation),
+
+        d = toDays(date),
+        n = julianCycle(d, lw),
+        ds = approxTransit(0, lw, n),
+
+        M = solarMeanAnomaly(ds),
+        L = eclipticLongitude(M),
+        dec = declination(L, 0),
+
+        Jnoon = solarTransitJ(ds, M, L),
+        h0 = (angle + dh) * rad,
+
+        Jset = getSetJ(h0, lw, phi, dec, n, M, L),
+        Jrise = Jnoon - (Jset - Jnoon);
+
+    return {
+        rise: fromJulian(Jrise),
+        set: fromJulian(Jset),
+    };
+};
+
 
 // moon calculations, based on http://aa.quae.nl/en/reken/hemelpositie.html formulas
 
