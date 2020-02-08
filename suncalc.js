@@ -193,6 +193,7 @@ SunCalc.getTimes = function (date, lat, lng, height) {
 SunCalc.getRiseAndSetAtSolarAngle = function (date, angle, lat, lng, elevation) {
 
     elevation = elevation || 0;
+    angle = angle - astroRefraction(angle) * 100;
 
     var lw = rad * -lng,
         phi = rad * lat,
@@ -208,7 +209,7 @@ SunCalc.getRiseAndSetAtSolarAngle = function (date, angle, lat, lng, elevation) 
         dec = declination(L, 0),
 
         Jnoon = solarTransitJ(ds, M, L),
-        h0 = (angle - 0.833 + dh) * rad,
+        h0 = (angle + dh) * rad,
 
         Jset = getSetJ(h0, lw, phi, dec, n, M, L),
         Jrise = Jnoon - (Jset - Jnoon);
