@@ -1,6 +1,6 @@
 {
   "name": "suncalc",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "A tiny JavaScript library for calculating sun/moon positions and phases.",
   "homepage": "https://github.com/mourner/suncalc",
   "keywords": [
@@ -12,7 +12,8 @@
     "sunset",
     "twilight",
     "moon",
-    "illumination"
+    "illumination",
+    "solar"
   ],
   "author": "Vladimir Agafonkin",
   "repository": {
