@@ -37,9 +37,13 @@
       "amd": true
     }
   },
+  "files": [
+    "suncalc.js"
+  ],
   "scripts": {
     "pretest": "eslint suncalc.js test.js",
-    "test": "node test.js"
+    "test": "node test.js",
+    "prepublishOnly": "npm test"
   },
   "jshintConfig": {
     "quotmark": "single",
