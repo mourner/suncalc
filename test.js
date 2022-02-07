@@ -1,6 +1,6 @@
 
 var SunCalc = require('./suncalc'),
-    t = require('tap');
+    t = require('tape');
 
 function near(val1, val2, margin) {
     return Math.abs(val1 - val2) < (margin || 1E-15);

@@ -21,9 +21,9 @@
   },
   "main": "suncalc.js",
   "devDependencies": {
-    "eslint": "^3.12.2",
+    "eslint": "^8.8.0",
     "eslint-config-mourner": "^2.0.1",
-    "tap": "^8.0.1"
+    "tape": "^5.5.0"
   },
   "eslintConfig": {
     "extends": "mourner",
@@ -39,8 +39,7 @@
   },
   "scripts": {
     "pretest": "eslint suncalc.js test.js",
-    "test": "tap test.js",
-    "cov": "tap test.js --cov"
+    "test": "node test.js"
   },
   "jshintConfig": {
     "quotmark": "single",
