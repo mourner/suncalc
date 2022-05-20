@@ -308,6 +308,56 @@ SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
     return result;
 };
 
+SunCalc.on = (coords, timeName, func) => {
+	if(typeof func != 'function') return 'no function given'
+	const timeNames = Object.keys(SunCalc.getTimes([50, -2]))
+	let realName = timeName.split(' ')[0], timeAdjust, isHours = false
+	let isValidName = (timeNames.includes(realName) || realName == 'all')
+	if(!isValidName) return 'available names: ' + timeNames.join(' ')
+	if(timeName != realName) {
+		timeAdjust = timeName.split(' ')[1]
+		if(timeAdjust.toLowerCase().includes('h')) isHours = true
+		timeAdjust = parseInt(timeAdjust)
+		timeAdjust *= (1000*60)
+		if(isHours) timeAdjust *= 60
+	}
+	let times = []
+	if(realName == 'all') {
+		times = timeNames
+	} else {
+		times.push(realName)
+	}
+	
+	times.forEach(name => {
+		let when = 0
+		let atDate = (SunCalc.getTimes(new Date(), ...coords)[name]).getTime();
+		if(isNaN(atDate)) {
+			console.log('Error setting', name, 'invalid time from suncalc')
+			return
+		} else {
+			if(timeAdjust) atDate += timeAdjust
+		}
+		
+		let now = new Date().getTime()
+		
+		if((now - atDate) > 0) {
+			when += (1000*60*60*24)
+			when -= (now - atDate)
+		} else {
+			when += (atDate - now)
+		}
+
+		console.log('Running', name, 'in', (when/1000/60/60).toFixed(1), 'hours')
+		setTimeout(() => {
+			func(coords, name)
+		}, when)
+	})
+	
+	setTimeout(() => {
+		circady.on(coords, timeName, func)
+	}, 1000*60*60*24)
+}
+
 
 // export as Node module / AMD module / browser variable
 if (typeof exports === 'object' && typeof module !== 'undefined') module.exports = SunCalc;
