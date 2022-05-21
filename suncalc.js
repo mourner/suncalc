@@ -308,14 +308,19 @@ SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
     return result;
 };
 
+
+SunCalc.__proto__.eventInternals = {'noInternals':true, 'toRestartFrom':[]};
+
 SunCalc.on = (coords, timeName, func) => {
 	if(typeof func != 'function') return 'no function given'
+
 	const timeNames = Object.keys(SunCalc.getTimes([50, -2]))
-	let realName = timeName.split(' ')[0], timeAdjust, isHours = false
+	let realName = timeName.split(' ')[0], timeAdjust, isHours = false, adjustSuffix
 	let isValidName = (timeNames.includes(realName) || realName == 'all')
 	if(!isValidName) return 'available names: ' + timeNames.join(' ')
 	if(timeName != realName) {
 		timeAdjust = timeName.split(' ')[1]
+		adjustSuffix = timeAdjust
 		if(timeAdjust.toLowerCase().includes('h')) isHours = true
 		timeAdjust = parseInt(timeAdjust)
 		timeAdjust *= (1000*60)
@@ -328,11 +333,48 @@ SunCalc.on = (coords, timeName, func) => {
 		times.push(realName)
 	}
 	
+	if(SunCalc.eventInternals.noInternals) {
+		SunCalc.eventInternals.noInternals = false
+		SunCalc.eventInternals.currentTimers = []
+		SunCalc.eventInternals.consistencyRefferance = new Date()
+		SunCalc.eventInternals.addToConsistency = 0
+	
+		SunCalc.eventInternals.isTimeNotConsistent = () => {
+			let runTime = SunCalc.eventInternals.consistencyRefferance.getTime()
+			runTime += SunCalc.eventInternals.addToConsistency
+			let now = (new Date()).getTime()
+			let timeNotConsistent = !((runTime > now-(1000 * 10)) && (runTime < now+(1000 * 10)))
+			return timeNotConsistent
+		}
+		SunCalc.eventInternals.clearTimers = () => {
+			SunCalc.eventInternals.currentTimers.forEach(timer => clearTimeout(timer))
+		}
+		SunCalc.eventInternals.restart = () => {
+			SunCalc.eventInternals.consistencyRefferance = new Date()
+			SunCalc.eventInternals.addToConsistency = 0
+			SunCalc.eventInternals.toRestartFrom.forEach(onArgsArr => SunCalc.on(...onArgsArr))
+		}
+
+		setInterval(
+			() => {
+				SunCalc.eventInternals.addToConsistency += 1000
+				if(SunCalc.eventInternals.isTimeNotConsistent()) {
+					SunCalc.eventInternals.clearTimers()
+					SunCalc.eventInternals.restart()
+					return
+				}
+			},
+			1000
+		)
+	}
+
+	SunCalc.eventInternals.toRestartFrom.push([coords, timeName, func])
+
 	times.forEach(name => {
 		let when = 0
 		let atDate = (SunCalc.getTimes(new Date(), ...coords)[name]).getTime();
 		if(isNaN(atDate)) {
-			console.log('Error setting', name, 'invalid time from suncalc')
+			console.log(name, 'does not occur here today, event will be placed when it does')
 			return
 		} else {
 			if(timeAdjust) atDate += timeAdjust
@@ -340,24 +382,26 @@ SunCalc.on = (coords, timeName, func) => {
 		
 		let now = new Date().getTime()
 		
-		if((now - atDate) > 0) {
-			when += (1000*60*60*24)
-			when -= (now - atDate)
-		} else {
-			when += (atDate - now)
-		}
+		if((now - atDate) > 0) when += (1000*60*60*24)
+		when += (atDate - now)
 
-		console.log('Running', name, 'in', (when/1000/60/60).toFixed(1), 'hours')
-		setTimeout(() => {
+		if(adjustSuffix) name = `${name} ${adjustSuffix}`
+
+		console.log('Running', name, 'in', Math.floor(when/1000/60/60), 'hours', Math.floor((when%(1000*60*60))/(1000*60)), 'minutes')
+		let newTimer = setTimeout(() => {
+			if(SunCalc.eventInternals.isTimeNotConsistent()) {
+				return
+			}
 			func(coords, name)
 		}, when)
+
+		SunCalc.eventInternals.currentTimers.push(newTimer)
 	})
-	
+
 	setTimeout(() => {
-		circady.on(coords, timeName, func)
+		SunCalc.on(coords, timeName, func)
 	}, 1000*60*60*24)
 }
-
 
 // export as Node module / AMD module / browser variable
 if (typeof exports === 'object' && typeof module !== 'undefined') module.exports = SunCalc;
