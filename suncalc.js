@@ -348,6 +348,7 @@ SunCalc.on = (coords, timeName, func) => {
 		}
 		SunCalc.eventInternals.clearTimers = () => {
 			SunCalc.eventInternals.currentTimers.forEach(timer => clearTimeout(timer))
+            SunCalc.eventInternals.currentTimers = []
 		}
 		SunCalc.eventInternals.restart = () => {
 			SunCalc.eventInternals.consistencyRefferance = new Date()
