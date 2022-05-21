@@ -339,12 +339,12 @@ SunCalc.on = (coords, timeName, func) => {
 		SunCalc.eventInternals.consistencyRefferance = new Date()
 		SunCalc.eventInternals.addToConsistency = 0
 	
-		SunCalc.eventInternals.isTimeNotConsistent = () => {
+		SunCalc.eventInternals.isRuntimeConsistent = () => {
 			let runTime = SunCalc.eventInternals.consistencyRefferance.getTime()
 			runTime += SunCalc.eventInternals.addToConsistency
 			let now = (new Date()).getTime()
-			let timeNotConsistent = !((runTime > now-(1000 * 10)) && (runTime < now+(1000 * 10)))
-			return timeNotConsistent
+			let isConsistant = ((runTime > now-(1000 * 10)) && (runTime < now+(1000 * 10)))
+			return isConsistant
 		}
 		SunCalc.eventInternals.clearTimers = () => {
 			SunCalc.eventInternals.currentTimers.forEach(timer => clearTimeout(timer))
@@ -352,13 +352,15 @@ SunCalc.on = (coords, timeName, func) => {
 		SunCalc.eventInternals.restart = () => {
 			SunCalc.eventInternals.consistencyRefferance = new Date()
 			SunCalc.eventInternals.addToConsistency = 0
-			SunCalc.eventInternals.toRestartFrom.forEach(onArgsArr => SunCalc.on(...onArgsArr))
+            let toRestartFromCopy = [...SunCalc.eventInternals.toRestartFrom]
+            SunCalc.eventInternals.toRestartFrom = []
+			toRestartFromCopy.forEach(onArgsArr => SunCalc.on(...onArgsArr))
 		}
 
 		setInterval(
 			() => {
 				SunCalc.eventInternals.addToConsistency += 1000
-				if(SunCalc.eventInternals.isTimeNotConsistent()) {
+				if(!SunCalc.eventInternals.isRuntimeConsistent()) {
 					SunCalc.eventInternals.clearTimers()
 					SunCalc.eventInternals.restart()
 					return
@@ -389,7 +391,7 @@ SunCalc.on = (coords, timeName, func) => {
 
 		console.log('Running', name, 'in', Math.floor(when/1000/60/60), 'hours', Math.floor((when%(1000*60*60))/(1000*60)), 'minutes')
 		let newTimer = setTimeout(() => {
-			if(SunCalc.eventInternals.isTimeNotConsistent()) {
+			if(!SunCalc.eventInternals.isRuntimeConsistent()) {
 				return
 			}
 			func(coords, name)
@@ -402,6 +404,7 @@ SunCalc.on = (coords, timeName, func) => {
 		SunCalc.on(coords, timeName, func)
 	}, 1000*60*60*24)
 }
+
 
 // export as Node module / AMD module / browser variable
 if (typeof exports === 'object' && typeof module !== 'undefined') module.exports = SunCalc;
