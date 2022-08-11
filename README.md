@@ -156,7 +156,7 @@ If `inUTC` is set to true, it will instead search the specified date from 0 to 2
 ### Solar time
 
 ```js
-SunCalc.getSolarTime(/*Date*/ date, /*Number*/ latitude, /*Number*/ utcOffset)
+SunCalc.getSolarTime(/*Date*/ date, /*Number*/ utcOffset, /*Number*/ longitude)
 ```
 
 Returns the solar time of the given date in the given latitude and UTC offset.
