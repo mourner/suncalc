@@ -153,7 +153,18 @@ Returns an object with the following properties:
 By default, it will search for moon rise and set during local user's day (frou 0 to 24 hours).
 If `inUTC` is set to true, it will instead search the specified date from 0 to 24 UTC hours.
 
+### Solar time
+
+```js
+SunCalc.getSolarTime(/*Date*/ date, /*Number*/ utcOffset, /*Number*/ longitude)
+```
+
+Returns the solar time of the given date in the given latitude and UTC offset.
+
 ## Changelog
+
+#### 1.9.0 &mdash; Jan 22, 2022
+- Added solar time.
 
 #### 1.8.0 &mdash; Dec 22, 2016
 

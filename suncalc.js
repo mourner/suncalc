@@ -308,6 +308,24 @@ SunCalc.getMoonTimes = function (date, lat, lng, inUTC) {
     return result;
 };
 
+// calculation for solar time based on https://www.pveducation.org/pvcdrom/properties-of-sunlight/solar-time
+
+SunCalc.getSolarTime = function (date, utcOffset, lng) {
+    // calculate the day of year
+    var start = new Date(date.getFullYear(), 0, 0);
+    var diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
+    var dayOfYear = Math.floor(diff / dayMs);
+
+    var b = 360 / 365 * (dayOfYear - 81) * rad;
+    var equationOfTime = 9.87 * sin(2 * b) - 7.53 * cos(b) - 1.5 * sin(b);
+    var localSolarTimeMeridian = 15 * utcOffset;
+    var timeCorrection = equationOfTime + 4 * (lng - localSolarTimeMeridian);
+    var localSolarTime = date.getHours() + timeCorrection / 60 + date.getMinutes() / 60;
+
+    var solarDate = new Date(0, 0);
+    solarDate.setMinutes(+localSolarTime * 60);
+    return solarDate;
+};
 
 // export as Node module / AMD module / browser variable
 if (typeof exports === 'object' && typeof module !== 'undefined') module.exports = SunCalc;

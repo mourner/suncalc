@@ -12,7 +12,8 @@
     "sunset",
     "twilight",
     "moon",
-    "illumination"
+    "illumination",
+    "solar"
   ],
   "author": "Vladimir Agafonkin",
   "repository": {
