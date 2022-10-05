@@ -1,9 +1,8 @@
+import * as SunCalc from './suncalc';
+import * as test from 'tape';
 
-var SunCalc = require('./suncalc'),
-    t = require('tape');
-
-function near(val1, val2, margin) {
-    return Math.abs(val1 - val2) < (margin || 1E-15);
+function near(val1, val2, margin = 1E-15) {
+    return Math.abs(val1 - val2) < margin;
 }
 
 var date = new Date('2013-03-05UTC'),
@@ -35,7 +34,7 @@ var heightTestTimes = {
     sunset: '2013-03-05T15:56:46Z'
 };
 
-t.test('getPosition returns azimuth and altitude for the given time and location', function (t) {
+test('getPosition returns azimuth and altitude for the given time and location', function (t) {
     var sunPos = SunCalc.getPosition(date, lat, lng);
 
     t.ok(near(sunPos.azimuth, -2.5003175907168385), 'azimuth');
@@ -43,7 +42,7 @@ t.test('getPosition returns azimuth and altitude for the given time and location
     t.end();
 });
 
-t.test('getTimes returns sun phases for the given date and location', function (t) {
+test('getTimes returns sun phases for the given date and location', function (t) {
     var times = SunCalc.getTimes(date, lat, lng);
 
     for (var i in testTimes) {
@@ -52,7 +51,7 @@ t.test('getTimes returns sun phases for the given date and location', function (
     t.end();
 });
 
-t.test('getTimes adjusts sun phases when additionally given the observer height', function (t) {
+test('getTimes adjusts sun phases when additionally given the observer height', function (t) {
     var times = SunCalc.getTimes(date, lat, lng, height);
 
     for (var i in heightTestTimes) {
@@ -61,7 +60,7 @@ t.test('getTimes adjusts sun phases when additionally given the observer height'
     t.end();
 });
 
-t.test('getMoonPosition returns moon position data given time and location', function (t) {
+test('getMoonPosition returns moon position data given time and location', function (t) {
     var moonPos = SunCalc.getMoonPosition(date, lat, lng);
 
     t.ok(near(moonPos.azimuth, -0.9783999522438226), 'azimuth');
@@ -70,7 +69,7 @@ t.test('getMoonPosition returns moon position data given time and location', fun
     t.end();
 });
 
-t.test('getMoonIllumination returns fraction and angle of moon\'s illuminated limb and phase', function (t) {
+test('getMoonIllumination returns fraction and angle of moon\'s illuminated limb and phase', function (t) {
     var moonIllum = SunCalc.getMoonIllumination(date);
 
     t.ok(near(moonIllum.fraction, 0.4848068202456373), 'fraction');
@@ -79,8 +78,8 @@ t.test('getMoonIllumination returns fraction and angle of moon\'s illuminated li
     t.end();
 });
 
-t.test('getMoonTimes returns moon rise and set times', function (t) {
-    var moonTimes = SunCalc.getMoonTimes(new Date('2013-03-04UTC'), lat, lng, true);
+test('getMoonTimes returns moon rise and set times', function (t) {
+    var moonTimes = SunCalc.getMoonTimes(new Date('2013-03-04UTC'), lat, lng, true) as {rise: Date, set: Date};
 
     t.equal(moonTimes.rise.toUTCString(), 'Mon, 04 Mar 2013 23:54:29 GMT');
     t.equal(moonTimes.set.toUTCString(), 'Mon, 04 Mar 2013 07:47:58 GMT');

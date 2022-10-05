@@ -21,9 +21,16 @@
   },
   "main": "suncalc.js",
   "devDependencies": {
+    "@types/tape": "^4.13.2",
+    "@typescript-eslint/parser": "^5.39.0",
     "eslint": "^8.8.0",
     "eslint-config-mourner": "^2.0.1",
-    "tape": "^5.5.0"
+    "tape": "^5.6.1",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.8.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-merge": "^5.8.0"
   },
   "eslintConfig": {
     "extends": "mourner",
@@ -33,17 +40,18 @@
       "strict": 0,
       "brace-style": 0
     },
-    "env": {
-      "amd": true
-    }
+    "parser": "@typescript-eslint/parser"
   },
   "files": [
     "suncalc.js"
   ],
   "scripts": {
-    "pretest": "eslint suncalc.js test.js",
-    "test": "node test.js",
-    "prepublishOnly": "npm test"
+    "build": "webpack --config webpack.prod.js",
+    "watch": "webpack --watch --config webpack.dev.js",
+    "pretest": "eslint suncalc.ts test.ts",
+    "test": "tsc test.ts && node test.js",
+    "prepublishOnly": "npm test",
+    "prepare": "npm run build"
   },
   "jshintConfig": {
     "quotmark": "single",
