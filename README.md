@@ -2,8 +2,6 @@
 SunCalc
 =======
 
-[![Build Status](https://travis-ci.org/mourner/suncalc.svg?branch=master)](https://travis-ci.org/mourner/suncalc)
-
 SunCalc is a tiny BSD-licensed JavaScript library for calculating sun position,
 sunlight phases (times for sunrise, sunset, dusk, etc.),
 moon position and lunar phase for the given location and time,
@@ -40,7 +38,7 @@ $ npm install suncalc
 ```
 
 ```js
-var SunCalc = require('suncalc');
+import * as SunCalc from 'suncalc';
 ```
 
 
