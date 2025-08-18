@@ -145,7 +145,7 @@ export function getTimes(date, lat, lng, height) {
 
     const result = {
         solarNoon: fromJulian(Jnoon),
-        nadir: fromJulian(Jnoon - 0.5)
+        nadir: fromJulian(Jnoon + 0.5)
     };
 
     for (const time of times) {
