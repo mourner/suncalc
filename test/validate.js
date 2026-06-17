@@ -100,7 +100,7 @@ function table(title, fields, unit) {
 }
 
 console.log(`SunCalc validation vs external truth (fixtures generated ${fx.generated})`);
-table('Sun position (deg vs JPL Horizons, airless)', ['sun.altitude', 'sun.azimuth', 'sun.angularSep'], '°');
+table('Sun position (deg vs JPL Horizons, refracted)', ['sun.altitude', 'sun.azimuth', 'sun.angularSep'], '°');
 table('Moon position (deg vs JPL Horizons, refracted)', ['moon.altitude', 'moon.azimuth', 'moon.angularSep'], '°');
 table('Moon illumination fraction (vs JPL Horizons)', ['moon.fraction'], '');
 table('Moon distance (km vs JPL Horizons, geocentric)', ['moon.distance_km'], 'km');

@@ -3,10 +3,10 @@
 // Run with `node test/fetch-truth.js`. Network required.
 //
 // Truth sources:
-//   - JPL Horizons (https://ssd.jpl.nasa.gov/api/horizons.api): topocentric apparent az/el
-//     for Sun (AIRLESS — matches getPosition, which adds no refraction) and Moon (REFRACTED —
-//     matches getMoonPosition, which adds refraction), plus geocentric Moon illuminated fraction
-//     and distance (location-independent — matches the geocentric getMoonIllumination/distance).
+//   - JPL Horizons (https://ssd.jpl.nasa.gov/api/horizons.api): topocentric apparent az/el for
+//     both Sun and Moon (REFRACTED — the v2 contract is "apparent topocentric coordinates an
+//     observer actually sees" for both bodies), plus geocentric Moon illuminated fraction and
+//     distance (location-independent — matches the geocentric getMoonIllumination/distance).
 //   - USNO (https://aa.usno.navy.mil/api/rstt/oneday): sunrise/sunset, civil dawn/dusk, solar
 //     transit, moonrise/moonset/transit, and polar "all day / none" phenomena, to the minute.
 //
@@ -218,7 +218,7 @@ const moonGeoByDay = {};
 const geoResults = await pool(days.map(d => () => fetchMoonGeo(d.date)), 2, 'moon-geo');
 days.forEach((d, i) => { moonGeoByDay[d.date] = geoResults[i]; });
 
-// 2) Per-location topocentric Sun (airless) and Moon (refracted), one call per body per day.
+// 2) Per-location topocentric apparent (refracted) Sun and Moon, one call per body per day.
 console.log('JPL Horizons - topocentric Sun & Moon');
 const topoJobs = [];
 for (const loc of locations) for (const d of days) {
@@ -228,7 +228,7 @@ for (const loc of locations) for (const d of days) {
 const topoResults = await pool(topoJobs.map(j => () => fetchTopo({
     body: j.body === 'sun' ? '10' : '301',
     lat: j.loc.lat, lng: j.loc.lng, date: j.date,
-    refracted: j.body === 'moon'
+    refracted: true
 })), 2, 'topo');
 
 // 3) Per-location USNO rise/set/twilight, one call per day.
@@ -258,7 +258,7 @@ usnoJobs.forEach((j, i) => { times[j.loc.name][j.date] = usnoResults[i]; });
 const fixtures = {
     generated: new Date().toISOString(),
     about: {
-        positions: 'JPL Horizons topocentric apparent. sun=AIRLESS (no refraction), moon=REFRACTED. azimuth deg North-referenced clockwise; altitude deg.',
+        positions: 'JPL Horizons topocentric apparent, REFRACTED for both Sun and Moon. azimuth deg North-referenced clockwise; altitude deg.',
         moonGeo: 'JPL Horizons geocentric: fraction 0-1, distance km.',
         times: 'USNO oneday (tz=0/UTC). sundata/moondata phen times "HH:MM"; civil twilight only.'
     },
