@@ -33,7 +33,8 @@ function declination(l, b)    { return asin(sin(b) * cos(e) + cos(b) * sin(e) * 
 function azimuth(H, phi, dec)  { return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi)); }
 function altitude(H, phi, dec) { return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H)); }
 
-function siderealTime(d, lw) { return rad * (280.16 + 360.9856235 * d) - lw; }
+// Greenwich mean sidereal time, formula 12.4 of Meeus (linear term; sub-arcsec T^2/T^3 dropped)
+function siderealTime(d, lw) { return rad * (280.46061837 + 360.98564736629 * d) - lw; }
 
 function astroRefraction(h) {
     if (h < 0) // the following formula works for positive altitudes only.
@@ -56,14 +57,24 @@ function eclipticLongitude(M) {
     return M + C + P + PI;
 }
 
+// Sun's apparent equatorial coordinates, Meeus ch. 25. d = days since J2000; t = Julian centuries.
+// (Uses UT as TT for now; ΔT — sub-0.001° for the Sun — is added with the rest of the time scales.)
 function sunCoords(d) {
 
-    const M = solarMeanAnomaly(d),
-        L = eclipticLongitude(M);
+    const t = d / 36525,
+        L0 = rad * (280.46646 + t * (36000.76983 + t * 0.0003032)),   // 25.2 geometric mean longitude
+        M = rad * (357.52911 + t * (35999.05029 - t * 0.0001537)),    // 25.3 mean anomaly
+        C = rad * ((1.914602 - t * (0.004817 + t * 0.000014)) * sin(M) + // equation of center
+            (0.019993 - 0.000101 * t) * sin(2 * M) +
+            0.000289 * sin(3 * M)),
+        Om = rad * (125.04 - 1934.136 * t),                           // longitude of the ascending node
+        L = L0 + C - rad * (0.00569 + 0.00478 * sin(Om)),             // apparent longitude (nutation + aberration)
+        e = rad * (23.439291 - t * (0.0130042 + t * (0.00000016 - t * 0.000000504))) +  // 22.2 mean obliquity
+            rad * 0.00256 * cos(Om);                                // 25.8 correction for apparent position
 
     return {
-        dec: declination(L, 0),
-        ra: rightAscension(L, 0)
+        ra: atan(cos(e) * sin(L), cos(L)), // 25.6
+        dec: asin(sin(e) * sin(L))         // 25.7
     };
 }
 
@@ -77,11 +88,14 @@ export function getPosition(date, lat, lng) {
         d   = toDays(date),
 
         c  = sunCoords(d),
-        H  = siderealTime(d, lw) - c.ra;
+        H  = siderealTime(d, lw) - c.ra,
+        h  = altitude(H, phi, c.dec);
 
     return {
-        azimuth: azimuth(H, phi, c.dec),
-        altitude: altitude(H, phi, c.dec)
+        // north-based clockwise azimuth in degrees (0 = N, 90 = E, 180 = S, 270 = W)
+        azimuth: (azimuth(H, phi, c.dec) / rad + 540) % 360,
+        // apparent (refraction-corrected) altitude in degrees
+        altitude: (h + astroRefraction(h)) / rad
     };
 };
 
