@@ -1,6 +1,6 @@
 
 // shortcuts for easier to read formulas
-const {PI, sin, cos, tan, asin, atan2: atan, acos} = Math;
+const {PI, sin, cos, tan, asin, atan2: atan, acos, sqrt, abs, round} = Math;
 const rad = PI / 180;
 
 // date/time constants and conversions
@@ -8,6 +8,7 @@ const rad = PI / 180;
 const dayMs = 1000 * 60 * 60 * 24;
 const J1970 = 2440588;
 const J2000 = 2451545;
+const earthRadius = 6378.14; // equatorial radius in km, for the Moon's topocentric parallax
 
 function fromJulian(j) {
     return new Date((j + 0.5 - J1970) * dayMs);
@@ -38,8 +39,9 @@ function toDaysTT(d) {
 
 // general calculations for position
 
+// north-based clockwise azimuth in degrees (0 = N, 90 = E, 180 = S, 270 = W)
 function azimuth(H, phi, dec) {
-    return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi));
+    return (atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi)) / rad + 540) % 360;
 }
 function altitude(H, phi, dec) {
     return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H));
@@ -54,7 +56,7 @@ function astroRefraction(h) {
     if (h < 0) h = 0; // formula valid for positive altitudes only
 
     // Meeus 16.4: 1.02 / tan(h + 10.26 / (h + 5.10)), h in degrees, arcmin result — folded into rad
-    return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
+    return 0.0002967 / tan(h + 0.00312536 / (h + 0.08901179));
 }
 
 // general sun calculations
@@ -90,8 +92,7 @@ export function getPosition(date, lat, lng) {
     const h = altitude(H, phi, c.dec);
 
     return {
-        // north-based clockwise azimuth in degrees (0 = N, 90 = E, 180 = S, 270 = W)
-        azimuth: (azimuth(H, phi, c.dec) / rad + 540) % 360,
+        azimuth: azimuth(H, phi, c.dec),
         // apparent (refraction-corrected) altitude in degrees
         altitude: (h + astroRefraction(h)) / rad
     };
@@ -119,12 +120,12 @@ export function addTime(angle, riseName, setName) {
 const J0 = 0.0009;
 
 function observerAngle(height) {
-    return -2.076 * Math.sqrt(height) / 60;
+    return -2.076 * sqrt(height) / 60;
 }
 
 // wrap an angle to (-PI, PI]
 function wrapPi(a) {
-    return a - 2 * PI * Math.round(a / (2 * PI));
+    return a - 2 * PI * round(a / (2 * PI));
 }
 
 // refines a transit time so the Sun's local hour angle is zero (Meeus 15.2; dH/dd ~= 2*PI/day,
@@ -139,8 +140,7 @@ function solarTransit(dt, lw) {
 
 // time the Sun reaches altitude h0 on the given side of transit (sign -1 = rise, +1 = set);
 // starts from the hour angle at transit and converges with Meeus' altitude correction (15.2).
-function getSetJ(h0, dt, sign, lw, phi) {
-    const decT = sunCoords(toDaysTT(dt)).dec;
+function getSetJ(h0, dt, sign, lw, phi, decT) {
     const cosH0 = (sin(h0) - sin(phi) * sin(decT)) / (cos(phi) * cos(decT));
     if (cosH0 < -1 || cosH0 > 1) return NaN; // sun stays above / below this altitude all day
 
@@ -148,9 +148,9 @@ function getSetJ(h0, dt, sign, lw, phi) {
     for (let i = 0; i < 2; i++) {
         const c = sunCoords(toDaysTT(d));
         const H = wrapPi(siderealTime(d, lw) - c.ra);
-        const h = asin(sin(phi) * sin(c.dec) + cos(phi) * cos(c.dec) * cos(H));
+        const h = altitude(H, phi, c.dec);
         const sinH = cos(phi) * cos(c.dec) * sin(H);
-        if (Math.abs(sinH) < 1e-6) break; // grazing the horizon — correction is ill-conditioned
+        if (abs(sinH) < 1e-6) break; // grazing the horizon — correction is ill-conditioned
         d += (h - h0) / (2 * PI * sinH);
     }
     return d;
@@ -167,31 +167,32 @@ export function getTimes(date, lat, lng, height = 0) {
     // Anchor to the input date's UTC solar day regardless of its time-of-day, killing the historical
     // "always pass noon" footgun where an early-morning Date returned the previous day's events:
     // round to that day's noon, offset to the nearest local solar noon, then let solarTransit refine.
-    const d = Math.round(Math.round(toDays(date)) - J0 - lw / (2 * PI));
+    const d = round(round(toDays(date)) - J0 - lw / (2 * PI));
     const dt = solarTransit(d + J0 + lw / (2 * PI), lw);
+    const dec = sunCoords(toDaysTT(dt)).dec; // declination at transit, shared by every rise/set solve
 
     const result = {
         solarNoon: fromJulian(dt + J2000),
         nadir: fromJulian(dt + J2000 - 0.5)
     };
 
-    for (const time of times) {
-        const h0 = (time[0] + dh) * rad;
-        const jrise = getSetJ(h0, dt, -1, lw, phi);
-        const jset = getSetJ(h0, dt, 1, lw, phi);
+    for (const [angle, riseName, setName] of times) {
+        const h0 = (angle + dh) * rad;
+        const jrise = getSetJ(h0, dt, -1, lw, phi, dec);
+        const jset = getSetJ(h0, dt, 1, lw, phi, dec);
 
         // a NaN means the Sun never reaches this altitude on this day — report null, not Invalid Date
-        result[time[1]] = isNaN(jrise) ? null : fromJulian(jrise + J2000);
-        result[time[2]] = isNaN(jset) ? null : fromJulian(jset + J2000);
+        result[riseName] = Number.isNaN(jrise) ? null : fromJulian(jrise + J2000);
+        result[setName] = Number.isNaN(jset) ? null : fromJulian(jset + J2000);
     }
 
     // polar day/night: when the Sun never crosses the standard rise/set altitude, flag which side it
     // stays on by comparing its altitude at solar noon (its daily maximum) against that threshold.
     if (result.sunrise === null) {
-        const dec = sunCoords(toDaysTT(dt)).dec;
-        const noonAlt = asin(sin(phi) * sin(dec) + cos(phi) * cos(dec));
-        result.alwaysUp = noonAlt > (times[0][0] + dh) * rad;
-        result.alwaysDown = !result.alwaysUp;
+        const noonAlt = altitude(0, phi, dec);
+        const riseSetAlt = (times[0][0] + dh) * rad;
+        result.alwaysUp = noonAlt > riseSetAlt;
+        result.alwaysDown = noonAlt <= riseSetAlt;
     }
 
     return result;
@@ -399,14 +400,13 @@ export function getMoonPosition(date, lat, lng) {
     // geocentric parallax (Meeus ch.40) lowers the moon along its vertical circle, leaving
     // azimuth unchanged; sin(parallax) = (Earth radius / distance) * cos(geocentric altitude).
     const hGeo = altitude(H, phi, c.dec);
-    const h = hGeo - asin(6378.14 / c.dist * cos(hGeo));
+    const h = hGeo - asin(earthRadius / c.dist * cos(hGeo));
 
     // parallactic angle, Meeus 14.1
     const pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
 
     return {
-        // north-based clockwise azimuth in degrees (0 = N, 90 = E, 180 = S, 270 = W)
-        azimuth: (azimuth(H, phi, c.dec) / rad + 540) % 360,
+        azimuth: azimuth(H, phi, c.dec),
         // apparent (refraction-corrected) altitude in degrees
         altitude: (h + astroRefraction(h)) / rad,
         distance: c.dist,
@@ -427,7 +427,7 @@ export function getMoonIllumination(date = new Date()) {
 
     return {
         fraction: (1 + cos(inc)) / 2,
-        phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
+        phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / PI,
         // position angle of the bright limb, degrees (v2: all angles emitted in degrees) — subtract
         // getMoonPosition().parallacticAngle, also degrees, to get the zenith-relative tilt
         angle: angle / rad
@@ -444,7 +444,7 @@ function hoursLater(date, h) {
 // tuned vs USNO). Crossing zero == upper-limb rise/set, the USNO convention.
 function moonHeight(date, lat, lng) {
     const p = getMoonPosition(date, lat, lng);
-    return p.altitude + 0.2725 * asin(6378.14 / p.distance) / rad + 0.09;
+    return p.altitude + 0.2725 * asin(earthRadius / p.distance) / rad + 0.09;
 }
 
 // polish a crossing time (ms): the quadratic sampler's parabola root sits up to ~0.2° off the true
@@ -479,11 +479,11 @@ export function getMoonTimes(date, lat, lng, inUTC) {
         ye = (a * xe + b) * xe + h1;
 
         if (d >= 0) {
-            const dx = Math.sqrt(d) / (Math.abs(a) * 2);
+            const dx = sqrt(d) / (abs(a) * 2);
             x1 = xe - dx;
             x2 = xe + dx;
-            if (Math.abs(x1) <= 1) roots++;
-            if (Math.abs(x2) <= 1) roots++;
+            if (abs(x1) <= 1) roots++;
+            if (abs(x2) <= 1) roots++;
             if (x1 < -1) x1 = x2;
         }
 
@@ -508,7 +508,11 @@ export function getMoonTimes(date, lat, lng, inUTC) {
     if (rise !== undefined) result.rise = new Date(refineMoonCross(hoursLater(t, rise).valueOf(), lat, lng));
     if (set !== undefined) result.set = new Date(refineMoonCross(hoursLater(t, set).valueOf(), lat, lng));
 
-    if (rise === undefined && set === undefined) result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
+    // no crossing all day: flag which side the moon stays on, setting both like getTimes does
+    if (rise === undefined && set === undefined) {
+        result.alwaysUp = ye > 0;
+        result.alwaysDown = ye <= 0;
+    }
 
     return result;
 }
