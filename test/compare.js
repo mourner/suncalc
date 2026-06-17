@@ -13,10 +13,6 @@ export function angularSep(az1, alt1, az2, alt2) { // on-sky angle between two (
         Math.cos(alt1 * r) * Math.cos(alt2 * r) * Math.cos((az1 - az2) * r);
     return Math.acos(Math.min(1, Math.max(-1, c))) * DEG;
 }
-// SunCalc moon azimuth (rad, from south, +west) -> degrees North-referenced clockwise (Horizons).
-// TODO: drop once getMoonPosition emits degrees/north-based per the v2 contract.
-const azToNorthDeg = rad => (((rad * DEG) + 180) % 360 + 360) % 360;
-
 // --- stats ---
 export function stats(errs) {
     if (!errs.length) return null;
@@ -58,11 +54,10 @@ export function measure(SunCalc, fx) {
             record('sun.angularSep', angularSep(p.azimuth, p.altitude, truth.azimuth, truth.altitude));
         }
         for (const [iso, truth] of Object.entries(bag.moon)) {
-            const p = SunCalc.getMoonPosition(new Date(iso), lat, lng);
-            const az = azToNorthDeg(p.azimuth), alt = p.altitude * DEG;
-            record('moon.altitude', Math.abs(alt - truth.altitude));
-            record('moon.azimuth', Math.abs(wrap180(az - truth.azimuth)));
-            record('moon.angularSep', angularSep(az, alt, truth.azimuth, truth.altitude));
+            const p = SunCalc.getMoonPosition(new Date(iso), lat, lng); // already degrees, north-based (v2)
+            record('moon.altitude', Math.abs(p.altitude - truth.altitude));
+            record('moon.azimuth', Math.abs(wrap180(p.azimuth - truth.azimuth)));
+            record('moon.angularSep', angularSep(p.azimuth, p.altitude, truth.azimuth, truth.altitude));
         }
     }
     for (const [iso, truth] of Object.entries(fx.moonGeo)) {

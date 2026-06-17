@@ -25,16 +25,17 @@ const TOLERANCE = {
     'sun.azimuth': {mean: 0.02, max: 0.05},
     'sun.angularSep': {mean: 0.12, max: 0.25},
 
-    // Moon position — still the legacy low-order series, geocentric (no topocentric parallax).
-    // TARGET arcminute-level; loose for now. azimuth/altitude omitted — angularSep is the
-    // headline (raw az error blows up near the zenith).
-    'moon.angularSep': {mean: 1.5,  max: 3.0},
+    // Moon position — Meeus ch.47 series, but still geocentric. The residual (~0.7° mean,
+    // ~1° max) is the missing topocentric parallax (≈0.95°); tighten to arcminute-level once
+    // parallax is applied. azimuth/altitude omitted — angularSep is the headline (raw az
+    // error blows up near the zenith).
+    'moon.angularSep': {mean: 0.85,  max: 1.1},
 
-    // Moon illumination — legacy low-order. TARGET <0.005.
-    'moon.fraction': {mean: 0.01, max: 0.02},
+    // Moon illumination — Meeus ch.47/48, now essentially exact. TARGET <0.005.
+    'moon.fraction': {mean: 0.002, max: 0.005},
 
-    // Moon distance — legacy single cosine term. TARGET <500 km.
-    'moon.distance_km': {mean: 5000, max: 10000},
+    // Moon distance — full ch.47 distance series. TARGET <500 km.
+    'moon.distance_km': {mean: 100, max: 100},
 
     // Sun times — legacy root-finding. TARGET ~1 min. Tail to ~11 min today.
     'time.sunrise': {mean: 2.0, max: 12},
@@ -43,9 +44,10 @@ const TOLERANCE = {
     'time.dawn': {mean: 2.0, max: 12},
     'time.dusk': {mean: 2.0, max: 12},
 
-    // Moon times — legacy, geocentric. TARGET ~few min. Loose for now.
-    'moontime.rise': {mean: 8,  max: 45},
-    'moontime.set': {mean: 8,  max: 45}
+    // Moon times — ch.47 series feeds the (still geocentric) root-finder. TARGET ~few min;
+    // tighten further once topocentric parallax is applied.
+    'moontime.rise': {mean: 5,  max: 20},
+    'moontime.set': {mean: 5,  max: 20}
 };
 
 for (const [field, tol] of Object.entries(TOLERANCE)) {
