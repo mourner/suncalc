@@ -2,7 +2,7 @@
   "name": "suncalc",
   "version": "1.9.0",
   "type": "module",
-  "exports": "./suncalc.js",
+  "exports": "./index.js",
   "sideEffects": false,
   "description": "A tiny JavaScript library for calculating sun/moon positions and phases.",
   "homepage": "https://github.com/mourner/suncalc",
@@ -22,18 +22,15 @@
     "type": "git",
     "url": "git://github.com/mourner/suncalc.git"
   },
-  "main": "suncalc.js",
+  "main": "index.js",
   "devDependencies": {
     "eslint": "^10.5.0",
     "eslint-config-mourner": "^5.0.1"
   },
-  "files": [
-    "suncalc.js"
-  ],
+  "files": [],
   "scripts": {
-    "pretest": "eslint suncalc.js test.js",
-    "test": "node --test",
-    "prepublishOnly": "npm test && npm run build"
+    "pretest": "eslint *.js",
+    "test": "node --test"
   },
   "jshintConfig": {
     "quotmark": "single",

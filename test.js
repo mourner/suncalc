@@ -1,5 +1,5 @@
 
-import * as SunCalc from './suncalc.js';
+import * as SunCalc from './index.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
