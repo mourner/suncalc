@@ -460,15 +460,24 @@ function hoursLater(date, h) {
 
 // calculations for moon rise/set times are based on http://www.stargazing.net/kepler/moonrise.html article
 
+// height of the moon's upper limb above the rise/set horizon (deg): topocentric centre altitude plus
+// the moon's semidiameter (0.2725 * equatorial horizontal parallax, so it tracks distance: ~0.25° at
+// apogee, ~0.28° at perigee) plus the residual horizon refraction our model under-bends (~0.09°,
+// tuned vs USNO). Crossing zero == upper-limb rise/set, the USNO convention.
+function moonHeight(date, lat, lng) {
+    const p = getMoonPosition(date, lat, lng);
+    return p.altitude + 0.2725 * asin(6378.14 / p.distance) / rad + 0.09;
+}
+
 // polish a crossing time (ms): the quadratic sampler's parabola root sits up to ~0.2° off the true
-// altitude curve, so Newton-refine against the real getMoonPosition altitude. Two central-difference
-// steps drop the mean error from ~0.65 to ~0.28 min; further from the horizon dh/dt is large and one
-// step suffices, near grazing the correction is small either way.
-function refineMoonCross(tMs, lat, lng, hc) {
+// altitude curve, so Newton-refine against the real moonHeight. Two central-difference steps drop the
+// mean error from ~0.65 to ~0.28 min; further from the horizon dh/dt is large and one step suffices,
+// near grazing the correction is small either way.
+function refineMoonCross(tMs, lat, lng) {
     for (let i = 0; i < 2; i++) {
-        const h = getMoonPosition(new Date(tMs), lat, lng).altitude - hc,
-            dh = (getMoonPosition(new Date(tMs + 30000), lat, lng).altitude -
-                getMoonPosition(new Date(tMs - 30000), lat, lng).altitude) / 60000;
+        const h = moonHeight(new Date(tMs), lat, lng),
+            dh = (moonHeight(new Date(tMs + 30000), lat, lng) -
+                moonHeight(new Date(tMs - 30000), lat, lng)) / 60000;
         tMs -= h / dh; // dh is degrees per ms, so h/dh is ms
     }
     return tMs;
@@ -479,17 +488,13 @@ export function getMoonTimes(date, lat, lng, inUTC) {
     if (inUTC) t.setUTCHours(0, 0, 0, 0);
     else t.setHours(0, 0, 0, 0);
 
-    // getMoonPosition already returns the topocentric, refraction-corrected altitude of the moon's
-    // centre, so rise/set is when the centre sits below the horizon by one mean semidiameter (~0.27°)
-    // plus the residual horizon refraction our model under-bends (~0.07°) — USNO upper-limb convention.
-    const hc = -0.34;
-    let h0 = getMoonPosition(t, lat, lng).altitude - hc,
+    let h0 = moonHeight(t, lat, lng),
         rise, set, ye;
 
     // go in 2-hour chunks, each time seeing if a 3-point quadratic curve crosses zero (which means rise or set)
     for (let i = 1; i <= 24; i += 2) {
-        const h1 = getMoonPosition(hoursLater(t, i), lat, lng).altitude - hc;
-        const h2 = getMoonPosition(hoursLater(t, i + 1), lat, lng).altitude - hc;
+        const h1 = moonHeight(hoursLater(t, i), lat, lng);
+        const h2 = moonHeight(hoursLater(t, i + 1), lat, lng);
         const a = (h0 + h2) / 2 - h1;
         const b = (h2 - h0) / 2;
         const xe = -b / (2 * a);
@@ -522,8 +527,8 @@ export function getMoonTimes(date, lat, lng, inUTC) {
 
     const result = {};
 
-    if (rise) result.rise = new Date(refineMoonCross(hoursLater(t, rise).valueOf(), lat, lng, hc));
-    if (set) result.set = new Date(refineMoonCross(hoursLater(t, set).valueOf(), lat, lng, hc));
+    if (rise) result.rise = new Date(refineMoonCross(hoursLater(t, rise).valueOf(), lat, lng));
+    if (set) result.set = new Date(refineMoonCross(hoursLater(t, set).valueOf(), lat, lng));
 
     if (!rise && !set) result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
 

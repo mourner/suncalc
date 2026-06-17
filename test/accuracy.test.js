@@ -47,12 +47,11 @@ const TOLERANCE = {
     'moon.distance_km': {mean: 100, max: 100},
 
     // Moon times — ch.47 series + topocentric parallax feed the quadratic sampler, then a Newton
-    // polish against the real altitude removes the parabola-root interpolation error (mean ~0.28 min).
-    // The residual max is the polar grazing case (Longyearbyen): there dh/dt -> 0, so the fixed hc
-    // threshold (a constant standing in for the variable lunar semidiameter) and USNO's whole-minute
-    // rounding dominate — root-finding can't reduce it further.
-    'moontime.rise': {mean: 0.4,  max: 1.2},
-    'moontime.set': {mean: 0.4,  max: 1.9}
+    // polish against moonHeight (centre altitude + distance-varying semidiameter + horizon refraction)
+    // removes the parabola-root interpolation error. Mean ~0.26 min, max <1 min; the floor is USNO's
+    // whole-minute rounding.
+    'moontime.rise': {mean: 0.4,  max: 0.9},
+    'moontime.set': {mean: 0.4,  max: 0.9}
 };
 
 for (const [field, tol] of Object.entries(TOLERANCE)) {
