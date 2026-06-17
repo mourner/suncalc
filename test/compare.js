@@ -35,6 +35,20 @@ function minutesDiff(a, b) {
 }
 const phen = (arr, name) => arr?.find(p => p.phen === name)?.time;
 
+// SunCalc centres each day's events on that day's solar noon, so near the poles a pre-noon rise
+// can fall on the previous calendar day. Match each USNO event to the SunCalc event of the same
+// field nearest in absolute time across date+/-1 — this compares corresponding events rather than
+// differencing two adjacent (different-day) sunrises, which the noon-centring otherwise produces.
+function nearestTimeDiff(SunCalc, date, lat, lng, field, truth) {
+    const noon = new Date(`${date}T12:00:00Z`).getTime();
+    let best = Infinity;
+    for (let off = -1; off <= 1; off++) {
+        const v = SunCalc.getTimes(new Date(noon + off * 86400000), lat, lng)[field];
+        if (v && !isNaN(v)) best = Math.min(best, Math.abs((v - truth) / 60000));
+    }
+    return best === Infinity ? null : best;
+}
+
 const sunMap = [['Rise', 'sunrise'], ['Set', 'sunset'], ['Upper Transit', 'solarNoon'],
     ['Begin Civil Twilight', 'dawn'], ['End Civil Twilight', 'dusk']];
 
@@ -71,10 +85,11 @@ export function measure(SunCalc, fx) {
     for (const [name, days] of Object.entries(fx.times)) {
         const {lat, lng} = byName[name];
         for (const [date, t] of Object.entries(days)) {
-            const st = SunCalc.getTimes(new Date(`${date}T12:00:00Z`), lat, lng);
             for (const [ph, field] of sunMap) {
                 const truth = usnoTime(date, phen(t.sundata, ph));
-                if (truth && st[field] && !isNaN(st[field])) record(`time.${field}`, minutesDiff(st[field], truth));
+                if (!truth) continue;
+                const diff = nearestTimeDiff(SunCalc, date, lat, lng, field, truth);
+                if (diff !== null) record(`time.${field}`, diff);
             }
             const mt = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), lat, lng, true);
             for (const [ph, field] of [['Rise', 'rise'], ['Set', 'set']]) {
