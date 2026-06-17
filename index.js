@@ -425,12 +425,18 @@ export function getMoonIllumination(date = new Date()) {
     const angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
         cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
 
+    const waxing = angle < 0; // bright limb leads → illuminated fraction is growing (new → full)
+
     return {
+        // illuminated fraction, 0 (new) → 1 (full); reaches the exact extrema only at perfect
+        // syzygy (eclipses), so a "full" moon typically peaks a hair under 1 — this is correct
         fraction: (1 + cos(inc)) / 2,
-        phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / PI,
+        // phase, 0 → 1: 0 new, 0.25 first quarter, 0.5 full, 0.75 last quarter (waxing for phase < 0.5)
+        phase: 0.5 + 0.5 * inc * (waxing ? -1 : 1) / PI,
         // position angle of the bright limb, degrees (v2: all angles emitted in degrees) — subtract
         // getMoonPosition().parallacticAngle, also degrees, to get the zenith-relative tilt
-        angle: angle / rad
+        angle: angle / rad,
+        waxing // true while the Moon is waxing (new → full), false while waning (full → new)
     };
 }
 
