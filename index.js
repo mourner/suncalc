@@ -411,7 +411,10 @@ export function getMoonPosition(date, lat, lng) {
         d = toDays(date),
         c = moonCoords(toDaysTT(d)),      // position series run on Terrestrial Time
         H = siderealTime(d, lw) - c.ra,   // sidereal time stays on UT
-        h = altitude(H, phi, c.dec),
+        // geocentric parallax (Meeus ch.40) lowers the moon along its vertical circle, leaving
+        // azimuth unchanged; sin(parallax) = (Earth radius / distance) * cos(geocentric altitude).
+        hGeo = altitude(H, phi, c.dec),
+        h = hGeo - asin(6378.14 / c.dist * cos(hGeo)),
         // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
         pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
 
@@ -462,7 +465,10 @@ export function getMoonTimes(date, lat, lng, inUTC) {
     if (inUTC) t.setUTCHours(0, 0, 0, 0);
     else t.setHours(0, 0, 0, 0);
 
-    const hc = 0.133; // moon's mean altitude (degrees) at rise/set, accounting for parallax & refraction
+    // getMoonPosition already returns the topocentric, refraction-corrected altitude of the moon's
+    // centre, so rise/set is when the centre sits below the horizon by one mean semidiameter (~0.27°)
+    // plus the residual horizon refraction our model under-bends (~0.07°) — USNO upper-limb convention.
+    const hc = -0.34;
     let h0 = getMoonPosition(t, lat, lng).altitude - hc,
         rise, set, ye;
 

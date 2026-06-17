@@ -25,18 +25,6 @@ const TOLERANCE = {
     'sun.azimuth': {mean: 0.02, max: 0.05},
     'sun.angularSep': {mean: 0.12, max: 0.25},
 
-    // Moon position — Meeus ch.47 series, but still geocentric. The residual (~0.7° mean,
-    // ~1° max) is the missing topocentric parallax (≈0.95°); tighten to arcminute-level once
-    // parallax is applied. azimuth/altitude omitted — angularSep is the headline (raw az
-    // error blows up near the zenith).
-    'moon.angularSep': {mean: 0.85,  max: 1.1},
-
-    // Moon illumination — Meeus ch.47/48, now essentially exact. TARGET <0.005.
-    'moon.fraction': {mean: 0.002, max: 0.005},
-
-    // Moon distance — full ch.47 distance series. TARGET <500 km.
-    'moon.distance_km': {mean: 100, max: 100},
-
     // Sun times — legacy root-finding. TARGET ~1 min. Tail to ~11 min today.
     'time.sunrise': {mean: 2.0, max: 12},
     'time.sunset': {mean: 2.0, max: 12},
@@ -44,10 +32,20 @@ const TOLERANCE = {
     'time.dawn': {mean: 2.0, max: 12},
     'time.dusk': {mean: 2.0, max: 12},
 
-    // Moon times — ch.47 series feeds the (still geocentric) root-finder. TARGET ~few min;
-    // tighten further once topocentric parallax is applied.
-    'moontime.rise': {mean: 5,  max: 20},
-    'moontime.set': {mean: 5,  max: 20}
+    // Moon position — Meeus ch.47 series + topocentric parallax (ch.40). Residual matches the
+    // Sun: horizon refraction-model divergence vs Horizons' atmosphere. azimuth/altitude omitted —
+    // angularSep is the headline (raw az error blows up near the zenith).
+    'moon.angularSep': {mean: 0.12,  max: 0.25},
+
+    // Moon illumination — Meeus ch.47/48, now essentially exact. TARGET <0.005.
+    'moon.fraction': {mean: 0.002, max: 0.005},
+
+    // Moon distance — full ch.47 distance series. TARGET <500 km.
+    'moon.distance_km': {mean: 100, max: 100},
+
+    // Moon times — ch.47 series + topocentric parallax feed the root-finder. TARGET ~1 min.
+    'moontime.rise': {mean: 1.0,  max: 2},
+    'moontime.set': {mean: 1.0,  max: 2}
 };
 
 for (const [field, tol] of Object.entries(TOLERANCE)) {
