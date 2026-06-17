@@ -29,7 +29,7 @@
   },
   "files": [],
   "scripts": {
-    "pretest": "eslint *.js",
+    "pretest": "eslint .",
     "test": "node --test"
   },
   "jshintConfig": {
