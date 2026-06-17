@@ -1,7 +1,7 @@
 
 // shortcuts for easier to read formulas
 const {PI, sin, cos, tan, asin, atan2: atan, acos} = Math;
-const rad  = PI / 180;
+const rad = PI / 180;
 
 // date/time constants and conversions
 
@@ -51,17 +51,15 @@ function siderealTime(d, lw) {
 }
 
 function astroRefraction(h) {
-    if (h < 0) h = 0; // the following formula works for positive altitudes only.
+    if (h < 0) h = 0; // formula valid for positive altitudes only
 
-    // formula 16.4 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
-    // 1.02 / tan(h + 10.26 / (h + 5.10)) h in degrees, result in arc minutes -> converted to rad:
+    // Meeus 16.4: 1.02 / tan(h + 10.26 / (h + 5.10)), h in degrees, arcmin result — folded into rad
     return 0.0002967 / Math.tan(h + 0.00312536 / (h + 0.08901179));
 }
 
 // general sun calculations
 
-// Sun's apparent equatorial coordinates, Meeus ch. 25. d = days since J2000; t = Julian centuries.
-// (Uses UT as TT for now; ΔT — sub-0.001° for the Sun — is added with the rest of the time scales.)
+// Sun's apparent equatorial coordinates, Meeus ch. 25. d = days since J2000 (TT); t = Julian centuries.
 function sunCoords(d) {
     const t = d / 36525;
     const L0 = rad * (280.46646 + t * (36000.76983 + t * 0.0003032)); // 25.2 geometric mean longitude
@@ -83,7 +81,7 @@ function sunCoords(d) {
 
 // calculates sun position for a given date and latitude/longitude
 export function getPosition(date, lat, lng) {
-    const lw  = rad * -lng;
+    const lw = rad * -lng;
     const phi = rad * lat;
     const d = toDays(date);
 
@@ -97,7 +95,7 @@ export function getPosition(date, lat, lng) {
         // apparent (refraction-corrected) altitude in degrees
         altitude: (h + astroRefraction(h)) / rad
     };
-};
+}
 
 // sun times configuration (angle, morning name, evening name)
 export const times = [
@@ -112,7 +110,7 @@ export const times = [
 // adds a custom time to the times config
 export function addTime(angle, riseName, setName) {
     times.push([angle, riseName, setName]);
-};
+}
 
 // calculations for sun times — Meeus ch.15 (rising, transit, setting), solving the Sun's
 // local hour angle directly off the same apparent coordinates (sunCoords) and sidereal time
@@ -158,7 +156,6 @@ function getSetJ(h0, dt, sign, lw, phi) {
     return d;
 }
 
-
 // calculates sun times for a given date, latitude/longitude, and, optionally,
 // the observer height (in meters) relative to the horizon
 
@@ -167,10 +164,9 @@ export function getTimes(date, lat, lng, height = 0) {
     const lw = rad * -lng;
     const phi = rad * lat;
     const dh = observerAngle(height);
-    // Anchor to the input date's solar day independent of the time-of-day passed in, killing the
-    // historical "always pass noon" footgun (an early-morning Date used to return the previous
-    // day's events). Math.round(toDays(date)) snaps to that UTC day's noon, then the longitude
-    // term offsets to the nearest local solar noon, which solarTransit refines.
+    // Anchor to the input date's UTC solar day regardless of its time-of-day, killing the historical
+    // "always pass noon" footgun where an early-morning Date returned the previous day's events:
+    // round to that day's noon, offset to the nearest local solar noon, then let solarTransit refine.
     const d = Math.round(Math.round(toDays(date)) - J0 - lw / (2 * PI));
     const dt = solarTransit(d + J0 + lw / (2 * PI), lw);
 
@@ -199,7 +195,7 @@ export function getTimes(date, lat, lng, height = 0) {
     }
 
     return result;
-};
+}
 
 // moon calculations, based on Meeus ch. 47 (truncated ELP-2000/82 series)
 
@@ -405,7 +401,7 @@ export function getMoonPosition(date, lat, lng) {
     const hGeo = altitude(H, phi, c.dec);
     const h = hGeo - asin(6378.14 / c.dist * cos(hGeo));
 
-    // formula 14.1 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
+    // parallactic angle, Meeus 14.1
     const pa = atan(sin(H), tan(phi) * cos(c.dec) - sin(c.dec) * cos(H));
 
     return {
@@ -416,11 +412,9 @@ export function getMoonPosition(date, lat, lng) {
         distance: c.dist,
         parallacticAngle: pa / rad
     };
-};
+}
 
-// calculations for illumination parameters of the moon,
-// based on http://idlastro.gsfc.nasa.gov/ftp/pro/astro/mphase.pro formulas and
-// Chapter 48 of "Astronomical Algorithms" 2nd edition by Jean Meeus (Willmann-Bell, Richmond) 1998.
+// moon illumination parameters, Meeus ch. 48 (and idlastro's mphase.pro)
 export function getMoonIllumination(date = new Date()) {
     const d = toDaysTT(toDays(date));
     const s = sunCoords(d);
@@ -438,7 +432,7 @@ export function getMoonIllumination(date = new Date()) {
         // getMoonPosition().parallacticAngle, also degrees, to get the zenith-relative tilt
         angle: angle / rad
     };
-};
+}
 
 function hoursLater(date, h) {
     return new Date(date.valueOf() + h * dayMs / 24);
@@ -455,8 +449,7 @@ function moonHeight(date, lat, lng) {
 
 // polish a crossing time (ms): the quadratic sampler's parabola root sits up to ~0.2° off the true
 // altitude curve, so Newton-refine against the real moonHeight. Two central-difference steps drop the
-// mean error from ~0.65 to ~0.28 min; further from the horizon dh/dt is large and one step suffices,
-// near grazing the correction is small either way.
+// mean error from ~0.65 to ~0.28 min; more don't help (near grazing dh/dt is small either way).
 function refineMoonCross(tMs, lat, lng) {
     for (let i = 0; i < 2; i++) {
         const h = moonHeight(new Date(tMs), lat, lng);
@@ -518,4 +511,4 @@ export function getMoonTimes(date, lat, lng, inUTC) {
     if (rise === undefined && set === undefined) result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
 
     return result;
-};
+}
