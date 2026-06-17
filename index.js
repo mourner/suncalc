@@ -61,10 +61,6 @@ function toDaysTT(d) { return d + deltaT(d) / 86400; }
 
 // general calculations for position
 
-const e = rad * 23.4397; // obliquity of the Earth
-
-function declination(l, b) { return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(l)); }
-
 function azimuth(H, phi, dec)  { return atan(sin(H), cos(H) * sin(phi) - tan(dec) * cos(phi)); }
 function altitude(H, phi, dec) { return asin(sin(phi) * sin(dec) + cos(phi) * cos(dec) * cos(H)); }
 
@@ -81,16 +77,6 @@ function astroRefraction(h) {
 }
 
 // general sun calculations
-
-function solarMeanAnomaly(d) { return rad * (357.5291 + 0.98560028 * d); }
-
-function eclipticLongitude(M) {
-
-    const C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M)), // equation of center
-        P = rad * 102.9372; // perihelion of the Earth
-
-    return M + C + P + PI;
-}
 
 // Sun's apparent equatorial coordinates, Meeus ch. 25. d = days since J2000; t = Julian centuries.
 // (Uses UT as TT for now; ΔT — sub-0.001° for the Sun — is added with the rest of the time scales.)
@@ -153,24 +139,44 @@ export function addTime(angle, riseName, setName) {
 };
 
 
-// calculations for sun times
+// calculations for sun times — Meeus ch.15 (rising, transit, setting), solving the Sun's
+// local hour angle directly off the same apparent coordinates (sunCoords) and sidereal time
+// used by getPosition. Day offsets d are in UT days since J2000; the position series run on TT.
 
 const J0 = 0.0009;
 
-function julianCycle(d, lw) { return Math.round(d - J0 - lw / (2 * PI)); }
-
-function approxTransit(Ht, lw, n) { return J0 + (Ht + lw) / (2 * PI) + n; }
-function solarTransitJ(ds, M, L)  { return J2000 + ds + 0.0053 * sin(M) - 0.0069 * sin(2 * L); }
-
-function hourAngle(h, phi, d) { return acos((sin(h) - sin(phi) * sin(d)) / (cos(phi) * cos(d))); }
 function observerAngle(height) { return -2.076 * Math.sqrt(height) / 60; }
 
-// returns set time for the given sun altitude
-function getSetJ(h, lw, phi, dec, n, M, L) {
+// wrap an angle to (-PI, PI]
+function wrapPi(a) { return a - 2 * PI * Math.round(a / (2 * PI)); }
 
-    const w = hourAngle(h, phi, dec),
-        a = approxTransit(w, lw, n);
-    return solarTransitJ(a, M, L);
+// refines a transit time so the Sun's local hour angle is zero (Meeus 15.2; dH/dd ~= 2*PI/day,
+// the sidereal excess and the Sun's own motion cancelling to one solar day).
+function solarTransit(dt, lw) {
+    for (let i = 0; i < 3; i++) {
+        const H = wrapPi(siderealTime(dt, lw) - sunCoords(toDaysTT(dt)).ra);
+        dt -= H / (2 * PI);
+    }
+    return dt;
+}
+
+// time the Sun reaches altitude h0 on the given side of transit (sign -1 = rise, +1 = set);
+// starts from the hour angle at transit and converges with Meeus' altitude correction (15.2).
+function getSetJ(h0, dt, sign, lw, phi) {
+    const decT = sunCoords(toDaysTT(dt)).dec,
+        cosH0 = (sin(h0) - sin(phi) * sin(decT)) / (cos(phi) * cos(decT));
+    if (cosH0 < -1 || cosH0 > 1) return NaN; // sun stays above / below this altitude all day
+
+    let d = dt + sign * acos(cosH0) / (2 * PI);
+    for (let i = 0; i < 2; i++) {
+        const c = sunCoords(toDaysTT(d)),
+            H = wrapPi(siderealTime(d, lw) - c.ra),
+            h = asin(sin(phi) * sin(c.dec) + cos(phi) * cos(c.dec) * cos(H)),
+            sinH = cos(phi) * cos(c.dec) * sin(H);
+        if (Math.abs(sinH) < 1e-6) break; // grazing the horizon — correction is ill-conditioned
+        d += (h - h0) / (2 * PI * sinH);
+    }
+    return d;
 }
 
 
@@ -185,25 +191,19 @@ export function getTimes(date, lat, lng, height) {
         phi = rad * lat,
         dh = observerAngle(height),
         d = toDays(date),
-        n = julianCycle(d, lw),
-        ds = approxTransit(0, lw, n),
-        M = solarMeanAnomaly(ds),
-        L = eclipticLongitude(M),
-        dec = declination(L, 0),
-        Jnoon = solarTransitJ(ds, M, L);
+        // seed the transit at approximate local noon, then refine
+        dt = solarTransit(Math.round(d - J0 - lw / (2 * PI)) + J0 + lw / (2 * PI), lw);
 
     const result = {
-        solarNoon: fromJulian(Jnoon),
-        nadir: fromJulian(Jnoon - 0.5)
+        solarNoon: fromJulian(dt + J2000),
+        nadir: fromJulian(dt + J2000 - 0.5)
     };
 
     for (const time of times) {
         const h0 = (time[0] + dh) * rad;
-        const Jset = getSetJ(h0, lw, phi, dec, n, M, L);
-        const Jrise = Jnoon - (Jset - Jnoon);
 
-        result[time[1]] = fromJulian(Jrise);
-        result[time[2]] = fromJulian(Jset);
+        result[time[1]] = fromJulian(getSetJ(h0, dt, -1, lw, phi) + J2000);
+        result[time[2]] = fromJulian(getSetJ(h0, dt, 1, lw, phi) + J2000);
     }
 
     return result;

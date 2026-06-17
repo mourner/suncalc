@@ -25,12 +25,16 @@ const TOLERANCE = {
     'sun.azimuth': {mean: 0.02, max: 0.05},
     'sun.angularSep': {mean: 0.12, max: 0.25},
 
-    // Sun times — legacy root-finding. TARGET ~1 min. Tail to ~11 min today.
-    'time.sunrise': {mean: 2.0, max: 12},
-    'time.sunset': {mean: 2.0, max: 12},
-    'time.solarNoon': {mean: 2.0, max: 4},
-    'time.dawn': {mean: 2.0, max: 12},
-    'time.dusk': {mean: 2.0, max: 12},
+    // Sun times — Meeus ch.15 hour-angle solver on the apparent sunCoords. Sub-0.5-min mean.
+    // The morning maxima (sunrise/dawn) are a convention artifact, not error: SunCalc centres each
+    // day's events on that day's solar noon, so at extreme polar latitudes the pre-noon rise lands
+    // on the adjacent calendar day vs USNO, and the harness' mod-24h fold surfaces the large
+    // day-over-day change in rise time (~8 min) there. Afternoon events stay on the same day.
+    'time.sunrise': {mean: 0.6, max: 9},
+    'time.sunset': {mean: 0.5, max: 3},
+    'time.solarNoon': {mean: 0.4, max: 1},
+    'time.dawn': {mean: 0.6, max: 9},
+    'time.dusk': {mean: 0.5, max: 3},
 
     // Moon position — Meeus ch.47 series + topocentric parallax (ch.40). Residual matches the
     // Sun: horizon refraction-model divergence vs Horizons' atmosphere. azimuth/altitude omitted —
