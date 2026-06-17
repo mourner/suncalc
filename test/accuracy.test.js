@@ -63,18 +63,51 @@ for (const [field, tol] of Object.entries(TOLERANCE)) {
     });
 }
 
-// Polar / always-up / always-down contract: getMoonTimes must report a flag (not a bogus time)
-// when the moon never crosses the horizon over the UTC day. Sanity check on the highest-lat site.
-test('getMoonTimes returns a flag when there is no crossing', () => {
-    const polar = fx.locations.reduce((a, b) => Math.abs(b.lat) > Math.abs(a.lat) ? b : a);
-    let sawFlag = false;
-    for (const date of Object.keys(fx.times[polar.name] ?? {})) {
-        const r = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), polar.lat, polar.lng, true);
-        if (!r.rise && !r.set) {
-            assert.ok(r.alwaysUp === true || r.alwaysDown === true,
-                `expected alwaysUp/alwaysDown flag on ${date} at ${polar.name}`);
-            sawFlag = true;
+// No silently-dropped samples: compare.js records a `missing.*` entry whenever external truth has an
+// event but SunCalc returns no usable time. Any such entry is a regression (a dropped comparison that
+// would otherwise lower the count without failing a tolerance), so the suite must see zero of them.
+test('no dropped samples (every truth event has a SunCalc time)', () => {
+    const dropped = Object.keys(collectors).filter(k => k.startsWith('missing.'));
+    assert.deepEqual(dropped, [],
+        `SunCalc produced no time where truth has an event: ${dropped.map(k => `${k.slice(8)} x${collectors[k].length}`).join(', ')}`);
+});
+
+// Polar absence contract (R2): when an event genuinely doesn't occur, getTimes/getMoonTimes must
+// return null / a flag — never an Invalid Date — and set exactly one of alwaysUp/alwaysDown.
+test('getTimes flags polar day/night instead of returning Invalid Date', () => {
+    let sawPolar = false;
+    for (const loc of fx.locations) {
+        for (const date of Object.keys(fx.times[loc.name] ?? {})) {
+            const r = SunCalc.getTimes(new Date(`${date}T12:00:00Z`), loc.lat, loc.lng);
+            for (const [, rise, set] of SunCalc.times) {
+                for (const f of [rise, set]) {
+                    assert.ok(!(r[f] instanceof Date && isNaN(r[f])), `${f} is Invalid Date at ${loc.name} ${date}`);
+                    assert.ok(r[f] === null || r[f] === undefined || !isNaN(r[f]), `${f} unusable at ${loc.name} ${date}`);
+                }
+            }
+            if (r.sunrise === null) {
+                sawPolar = true;
+                assert.equal(r.alwaysUp === true ? 1 : 0, r.alwaysDown === true ? 0 : 1,
+                    `expected exactly one of alwaysUp/alwaysDown at ${loc.name} ${date}`);
+            } else {
+                assert.equal(r.alwaysUp, undefined, `alwaysUp set on a normal day at ${loc.name} ${date}`);
+                assert.equal(r.alwaysDown, undefined, `alwaysDown set on a normal day at ${loc.name} ${date}`);
+            }
         }
     }
-    assert.ok(sawFlag !== undefined); // informational; no crossing-free day is fine
+    assert.ok(sawPolar, 'fixture matrix should include at least one polar day/night case');
+});
+
+test('getMoonTimes flags no-crossing days instead of returning a bogus time', () => {
+    const polar = fx.locations.reduce((a, b) => Math.abs(b.lat) > Math.abs(a.lat) ? b : a);
+    for (const date of Object.keys(fx.times[polar.name] ?? {})) {
+        const r = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), polar.lat, polar.lng, true);
+        if (r.rise === undefined && r.set === undefined) {
+            assert.ok(r.alwaysUp === true || r.alwaysDown === true,
+                `expected alwaysUp/alwaysDown flag on ${date} at ${polar.name}`);
+        } else {
+            assert.ok(!(r.rise instanceof Date && isNaN(r.rise)), `rise Invalid Date ${date}`);
+            assert.ok(!(r.set instanceof Date && isNaN(r.set)), `set Invalid Date ${date}`);
+        }
+    }
 });

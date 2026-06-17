@@ -190,9 +190,12 @@ export function getTimes(date, lat, lng, height) {
     const lw = rad * -lng,
         phi = rad * lat,
         dh = observerAngle(height),
-        d = toDays(date),
-        // seed the transit at approximate local noon, then refine
-        dt = solarTransit(Math.round(d - J0 - lw / (2 * PI)) + J0 + lw / (2 * PI), lw);
+        // Anchor to the input date's solar day independent of the time-of-day passed in, killing the
+        // historical "always pass noon" footgun (an early-morning Date used to return the previous
+        // day's events). Math.round(toDays(date)) snaps to that UTC day's noon, then the longitude
+        // term offsets to the nearest local solar noon, which solarTransit refines.
+        d = Math.round(Math.round(toDays(date)) - J0 - lw / (2 * PI)),
+        dt = solarTransit(d + J0 + lw / (2 * PI), lw);
 
     const result = {
         solarNoon: fromJulian(dt + J2000),
@@ -200,10 +203,22 @@ export function getTimes(date, lat, lng, height) {
     };
 
     for (const time of times) {
-        const h0 = (time[0] + dh) * rad;
+        const h0 = (time[0] + dh) * rad,
+            jrise = getSetJ(h0, dt, -1, lw, phi),
+            jset = getSetJ(h0, dt, 1, lw, phi);
 
-        result[time[1]] = fromJulian(getSetJ(h0, dt, -1, lw, phi) + J2000);
-        result[time[2]] = fromJulian(getSetJ(h0, dt, 1, lw, phi) + J2000);
+        // a NaN means the Sun never reaches this altitude on this day — report null, not Invalid Date
+        result[time[1]] = isNaN(jrise) ? null : fromJulian(jrise + J2000);
+        result[time[2]] = isNaN(jset) ? null : fromJulian(jset + J2000);
+    }
+
+    // polar day/night: when the Sun never crosses the standard rise/set altitude, flag which side it
+    // stays on by comparing its altitude at solar noon (its daily maximum) against that threshold.
+    if (result.sunrise === null) {
+        const dec = sunCoords(toDaysTT(dt)).dec,
+            noonAlt = asin(sin(phi) * sin(dec) + cos(phi) * cos(dec));
+        result.alwaysUp = noonAlt > (times[0][0] + dh) * rad;
+        result.alwaysDown = !result.alwaysUp;
     }
 
     return result;
@@ -449,7 +464,9 @@ export function getMoonIllumination(date) {
     return {
         fraction: (1 + cos(inc)) / 2,
         phase: 0.5 + 0.5 * inc * (angle < 0 ? -1 : 1) / Math.PI,
-        angle
+        // position angle of the bright limb, degrees (v2: all angles emitted in degrees) — subtract
+        // getMoonPosition().parallacticAngle, also degrees, to get the zenith-relative tilt
+        angle: angle / rad
     };
 };
 
@@ -520,17 +537,19 @@ export function getMoonTimes(date, lat, lng, inUTC) {
             set = i + (ye < 0 ? x1 : x2);
         }
 
-        if (rise && set) break;
+        if (rise !== undefined && set !== undefined) break;
 
         h0 = h2;
     }
 
     const result = {};
 
-    if (rise) result.rise = new Date(refineMoonCross(hoursLater(t, rise).valueOf(), lat, lng));
-    if (set) result.set = new Date(refineMoonCross(hoursLater(t, set).valueOf(), lat, lng));
+    // compare against undefined, not truthiness: a crossing at exactly hour 0 (midnight) is a real
+    // event whose numeric value is 0, which a truthy check would wrongly treat as "no event".
+    if (rise !== undefined) result.rise = new Date(refineMoonCross(hoursLater(t, rise).valueOf(), lat, lng));
+    if (set !== undefined) result.set = new Date(refineMoonCross(hoursLater(t, set).valueOf(), lat, lng));
 
-    if (!rise && !set) result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
+    if (rise === undefined && set === undefined) result[ye > 0 ? 'alwaysUp' : 'alwaysDown'] = true;
 
     return result;
 };

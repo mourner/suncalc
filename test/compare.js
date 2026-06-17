@@ -87,14 +87,17 @@ export function measure(SunCalc, fx) {
         for (const [date, t] of Object.entries(days)) {
             for (const [ph, field] of sunMap) {
                 const truth = usnoTime(date, phen(t.sundata, ph));
-                if (!truth) continue;
+                if (!truth) continue; // USNO didn't report this event (polar day/night) — not a miss
                 const diff = nearestTimeDiff(SunCalc, date, lat, lng, field, truth);
-                if (diff !== null) record(`time.${field}`, diff);
+                // truth exists but SunCalc produced no usable time: a dropped sample, not a skip
+                record(diff !== null ? `time.${field}` : `missing.time.${field}`, diff !== null ? diff : 1);
             }
             const mt = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), lat, lng, true);
             for (const [ph, field] of [['Rise', 'rise'], ['Set', 'set']]) {
                 const truth = usnoTime(date, phen(t.moondata, ph));
-                if (truth && mt[field] && !isNaN(mt[field])) record(`moontime.${field}`, minutesDiff(mt[field], truth));
+                if (!truth) continue;
+                const ok = mt[field] && !isNaN(mt[field]);
+                record(ok ? `moontime.${field}` : `missing.moontime.${field}`, ok ? minutesDiff(mt[field], truth) : 1);
             }
         }
     }
