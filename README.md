@@ -176,8 +176,7 @@ The `phase` value maps to the named phases like this:
 The four named values (0, 0.25, 0.5, 0.75) are exact instants; any other value falls in
 one of the crescent/gibbous ranges between them. So `phase: 0.4945…` is **not** "Full
 Moon" — it's late Waxing Gibbous, just shy of full. To map a value to one of the eight
-names, snap it to the nearest one-eighth (each name owns a 0.125-wide band centered on
-its value):
+names, snap it to the nearest one-eighth:
 
 ```javascript
 const names = ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous',
@@ -186,8 +185,8 @@ const {phase} = SunCalc.getMoonIllumination(new Date());
 const name = names[Math.round(phase * 8) % 8];
 ```
 
-(Use `phase` for the name and `fraction` for "how lit" — `fraction` peaks just under
-`1.0` even at full moon, so don't test it for exact `0` or `1`.)
+Use `phase` for the name and `fraction` for how lit the disk is — and since `fraction`
+only reaches an exact `0` or `1` at an eclipse, don't test it for equality with those.
 
 By subtracting `getMoonPosition().parallacticAngle` from `angle` (both in degrees)
 you get the zenith angle of the moon's bright limb (anticlockwise). The zenith
@@ -197,7 +196,7 @@ angle can be used to draw the moon's shape from the observer's perspective
 ### Moon rise and set times
 
 ```js
-SunCalc.getMoonTimes(date, latitude, longitude)
+SunCalc.getMoonTimes(date, lat, lng)
 ```
 
 Returns an object with the following properties:
