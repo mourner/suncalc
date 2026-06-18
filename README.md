@@ -1,34 +1,66 @@
 SunCalc
 =======
 
-SunCalc is a tiny, dependency-free JavaScript library for calculating sun position,
-sunlight phases (sunrise, sunset, dusk, etc.), moon position, moonrise and moonset
-times, and lunar phase for any location and time.
+SunCalc is a tiny, dependency-free JavaScript library for calculating **sun position**,
+**sunlight phases** (sunrise, sunset, dusk, etc.), **moon position**, **moonrise** and **moonset**
+times, and **lunar phase** for any location and time.
+
 It matches the accuracy and conventions of [timeanddate.com](https://www.timeanddate.com/)
 and the [U.S. Naval Observatory](https://aa.usno.navy.mil/).
-
 Calculations are based on the formulas from Jean Meeus' *Astronomical Algorithms*.
-
 You can read about different twilight phases calculated by SunCalc
 in the [Twilight article on Wikipedia](http://en.wikipedia.org/wiki/Twilight).
 
-## Example
+[![Build Status](https://github.com/mourner/suncalc/actions/workflows/test.yml/badge.svg)](https://github.com/mourner/suncalc/actions) [![Simply Awesome](https://img.shields.io/badge/simply-awesome-brightgreen.svg)](https://github.com/mourner/projects)
 
-Install with `npm install suncalc`, then:
+## Example
 
 ```javascript
 import * as SunCalc from 'suncalc';
 
 const times = SunCalc.getTimes(new Date(), 51.5, -0.1); // get today's sunlight times for London
-
 console.log(`Sunrise time: ${times.sunrise.toLocaleString()}`);
 
 const sunrisePos = SunCalc.getPosition(times.sunrise, 51.5, -0.1); // get Sun position at today's sunrise
-
 console.log(`Sunrise direction: ${sunrisePos.azimuth} degrees`);
 ```
 
+## Install
+
+Install with npm: `npm install suncalc`, then import it as a module:
+
+```js
+import * as SunCalc from 'suncalc';
+```
+
+Or use it directly in the browser via [jsDelivr](https://www.jsdelivr.com/esm):
+
+```html
+<script type="module">
+    import * as SunCalc from 'https://cdn.jsdelivr.net/npm/suncalc/+esm';
+</script>
+```
+
+Alternatively, there's a browser bundle that exposes a `SunCalc` global variable:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/suncalc"></script>
+```
+
 ## Reference
+
+### Sun position
+
+```javascript
+SunCalc.getPosition(timeAndDate, latitude, longitude)
+```
+
+Returns an object with the following properties:
+
+ * `altitude`: apparent (refraction-corrected) sun altitude above the horizon in
+   degrees, e.g. `0` at the horizon and `90` at the zenith (straight overhead)
+ * `azimuth`: sun azimuth in degrees, clockwise from north
+   (`0` = N, `90` = E, `180` = S, `270` = W)
 
 ### Sunlight times
 
@@ -84,19 +116,6 @@ For example, to add the [blue hour](https://en.wikipedia.org/wiki/Blue_hour)
 SunCalc.addTime(-4, 'morningBlueHourEnd', 'blueHour');
 SunCalc.addTime(-8, 'morningBlueHour', 'blueHourEnd');
 ```
-
-### Sun position
-
-```javascript
-SunCalc.getPosition(timeAndDate, latitude, longitude)
-```
-
-Returns an object with the following properties:
-
- * `altitude`: apparent (refraction-corrected) sun altitude above the horizon in
-   degrees, e.g. `0` at the horizon and `90` at the zenith (straight overhead)
- * `azimuth`: sun azimuth in degrees, clockwise from north
-   (`0` = N, `90` = E, `180` = S, `270` = W)
 
 ### Moon position
 
@@ -164,6 +183,20 @@ day, so this function scans a fixed 24-hour window: the **UTC calendar day** of 
 given date (consistent with the rest of the API, which treats dates as UTC
 instants). If you want the window to follow an observer's local civil day, pass a
 `date` set to their local midnight.
+
+## Accuracy
+
+Every function is built on higher-order astronomical models from Jean Meeus'
+*Astronomical Algorithms* and validated against [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/)
+and the [U.S. Naval Observatory](https://aa.usno.navy.mil/). Typical errors:
+
+| | Position | Rise/set times | Distance |
+| --- | --- | --- | --- |
+| Sun | ~0.08° | ~15 s | — |
+| Moon | ~0.09° | ~15 s | ~20 km |
+
+Rise and set times are accurate to ~15 seconds — at the floor of what the USNO's
+whole-minute reference data can even measure.
 
 ## Changelog
 
