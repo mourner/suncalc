@@ -79,5 +79,5 @@ export interface MoonTimes {
     alwaysDown?: boolean;
 }
 
-/** Moon rise/set times for the given date (UTC day if `inUTC`, else local day). */
-export function getMoonTimes(date: Date, lat: number, lng: number, inUTC?: boolean): MoonTimes;
+/** Moon rise/set times over the UTC calendar day of the given date. */
+export function getMoonTimes(date: Date, lat: number, lng: number): MoonTimes;

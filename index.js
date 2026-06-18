@@ -465,10 +465,11 @@ function refineMoonCross(tMs, lat, lng) {
     return tMs;
 }
 
-export function getMoonTimes(date, lat, lng, inUTC) {
+export function getMoonTimes(date, lat, lng) {
+    // scan the UTC calendar day of the given date; the date is treated as a UTC instant like
+    // everywhere else in the API. For a local-civil-day window, pass a date at local midnight.
     const t = new Date(date);
-    if (inUTC) t.setUTCHours(0, 0, 0, 0);
-    else t.setHours(0, 0, 0, 0);
+    t.setUTCHours(0, 0, 0, 0);
 
     let h0 = moonHeight(t, lat, lng);
     let rise, set, ye;

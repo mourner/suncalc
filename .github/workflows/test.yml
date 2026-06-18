@@ -1,16 +1,15 @@
 name: Test
-
-on:
-  push:
-    branches: ['*']
-  pull_request:
-    branches: [master]
-
+on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/checkout@v6
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 24
+        cache: npm
     - run: npm ci
     - run: npm test

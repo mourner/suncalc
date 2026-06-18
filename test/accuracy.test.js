@@ -101,7 +101,7 @@ test('getTimes flags polar day/night instead of returning Invalid Date', () => {
 test('getMoonTimes flags no-crossing days instead of returning a bogus time', () => {
     const polar = fx.locations.reduce((a, b) => Math.abs(b.lat) > Math.abs(a.lat) ? b : a);
     for (const date of Object.keys(fx.times[polar.name] ?? {})) {
-        const r = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), polar.lat, polar.lng, true);
+        const r = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), polar.lat, polar.lng);
         if (r.rise === undefined && r.set === undefined) {
             assert.ok(r.alwaysUp === true || r.alwaysDown === true,
                 `expected alwaysUp/alwaysDown flag on ${date} at ${polar.name}`);

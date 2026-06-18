@@ -92,7 +92,7 @@ export function measure(SunCalc, fx) {
                 // truth exists but SunCalc produced no usable time: a dropped sample, not a skip
                 record(diff !== null ? `time.${field}` : `missing.time.${field}`, diff !== null ? diff : 1);
             }
-            const mt = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), lat, lng, true);
+            const mt = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), lat, lng);
             for (const [ph, field] of [['Rise', 'rise'], ['Set', 'set']]) {
                 const truth = usnoTime(date, phen(t.moondata, ph));
                 if (!truth) continue;
