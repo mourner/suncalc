@@ -52,7 +52,7 @@ Alternatively, there's a browser bundle that exposes a `SunCalc` global variable
 ### Sun position
 
 ```javascript
-SunCalc.getPosition(timeAndDate, latitude, longitude)
+SunCalc.getPosition(date, lat, lng)
 ```
 
 Returns an object with the following properties:
@@ -65,31 +65,33 @@ Returns an object with the following properties:
 ### Sunlight times
 
 ```javascript
-SunCalc.getTimes(date, latitude, longitude, height = 0)
+SunCalc.getTimes(date, lat, lng, height = 0)
 ```
 
 Returns sunlight times for the solar day containing `date`, at the given latitude,
 longitude and (optional) observer `height` above the horizon in meters.
 
 The result is an object whose properties are `Date` objects (or `null` when the
-event doesn't occur that day):
+event doesn't occur that day). Listed in the order they occur over the solar day,
+with example times for Kyiv (50.45°N, 30.52°E) on 24 August 2026, shown in local
+time (EEST, UTC+3):
 
-| Property        | Description                                                              |
-| --------------- | ------------------------------------------------------------------------ |
-| `sunrise`       | sunrise (top edge of the sun appears on the horizon)                     |
-| `sunriseEnd`    | sunrise ends (bottom edge of the sun touches the horizon)                |
-| `goldenHourEnd` | morning golden hour (soft light, best time for photography) ends         |
-| `solarNoon`     | solar noon (sun is in the highest position)                              |
-| `goldenHour`    | evening golden hour starts                                               |
-| `sunsetStart`   | sunset starts (bottom edge of the sun touches the horizon)               |
-| `sunset`        | sunset (sun disappears below the horizon, evening civil twilight starts) |
-| `dusk`          | dusk (evening nautical twilight starts)                                  |
-| `nauticalDusk`  | nautical dusk (evening astronomical twilight starts)                     |
-| `night`         | night starts (dark enough for astronomical observations)                 |
-| `nadir`         | nadir (darkest moment of the night, sun is in the lowest position)       |
-| `nightEnd`      | night ends (morning astronomical twilight starts)                        |
-| `nauticalDawn`  | nautical dawn (morning nautical twilight starts)                         |
-| `dawn`          | dawn (morning nautical twilight ends, morning civil twilight starts)     |
+| Property        | Description                                                              | Kyiv example |
+| --------------- | ------------------------------------------------------------------------ | -----------: |
+| `nadir`         | nadir (darkest moment of the night, sun is in the lowest position)       |       01:00  |
+| `nightEnd`      | night ends (morning astronomical twilight starts)                        |       03:51  |
+| `nauticalDawn`  | nautical dawn (morning nautical twilight starts)                         |       04:41  |
+| `dawn`          | dawn (morning nautical twilight ends, morning civil twilight starts)     |       05:24  |
+| `sunrise`       | sunrise (top edge of the sun appears on the horizon)                     |       05:59  |
+| `sunriseEnd`    | sunrise ends (bottom edge of the sun touches the horizon)                |       06:03  |
+| `goldenHourEnd` | morning golden hour (soft light, best time for photography) ends         |       06:44  |
+| `solarNoon`     | solar noon (sun is in the highest position)                              |       13:00  |
+| `goldenHour`    | evening golden hour starts                                               |       19:15  |
+| `sunsetStart`   | sunset starts (bottom edge of the sun touches the horizon)               |       19:56  |
+| `sunset`        | sunset (sun disappears below the horizon, evening civil twilight starts) |       19:59  |
+| `dusk`          | dusk (evening nautical twilight starts)                                  |       20:34  |
+| `nauticalDusk`  | nautical dusk (evening astronomical twilight starts)                     |       21:18  |
+| `night`         | night starts (dark enough for astronomical observations)                 |       22:06  |
 
 `solarNoon` and `nadir` are always present. At high latitudes, when the sun stays
 above or below the rise/set altitude for the whole day, the rise/set-related times
@@ -97,6 +99,17 @@ are `null` and one of these flags is set:
 
  * `alwaysUp`: `true` when the sun never sets that day (polar day)
  * `alwaysDown`: `true` when the sun never rises that day (polar night)
+
+The returned `Date`s are absolute UTC instants with no time zone of their own (as
+everywhere in SunCalc). To show one in a specific zone, format it with an explicit
+`timeZone` — daylight saving time is then applied for you:
+
+```javascript
+times.sunset.toLocaleString('en-GB', {timeZone: 'Europe/Kyiv'}); // → "24/08/2026, 19:59:00"
+```
+
+With no `timeZone`, `toLocaleString` uses the machine's local zone, so the same code
+prints different clock times on different machines.
 
 ```javascript
 SunCalc.addTime(angleInDegrees, morningName, eveningName)
@@ -120,7 +133,7 @@ SunCalc.addTime(-8, 'morningBlueHour', 'blueHourEnd');
 ### Moon position
 
 ```javascript
-SunCalc.getMoonPosition(timeAndDate, latitude, longitude)
+SunCalc.getMoonPosition(date, lat, lng)
 ```
 
 Returns an object with the following properties:
@@ -133,7 +146,7 @@ Returns an object with the following properties:
 ### Moon illumination
 
 ```javascript
-SunCalc.getMoonIllumination(timeAndDate)
+SunCalc.getMoonIllumination(date)
 ```
 
 Returns an object with the following properties:
@@ -147,7 +160,7 @@ Returns an object with the following properties:
  * `waxing`: `true` while the moon is waxing (new → full), `false` while waning
    (full → new)
 
-Moon phase value should be interpreted like this:
+The `phase` value maps to the named phases like this:
 
 | Phase | Name            |
 | -----:| --------------- |
@@ -159,6 +172,22 @@ Moon phase value should be interpreted like this:
 |       | Waning Gibbous  |
 | 0.75  | Last Quarter    |
 |       | Waning Crescent |
+
+The four named values (0, 0.25, 0.5, 0.75) are exact instants; any other value falls in
+one of the crescent/gibbous ranges between them. So `phase: 0.4945…` is **not** "Full
+Moon" — it's late Waxing Gibbous, just shy of full. To map a value to one of the eight
+names, snap it to the nearest one-eighth (each name owns a 0.125-wide band centered on
+its value):
+
+```javascript
+const names = ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous',
+               'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent'];
+const {phase} = SunCalc.getMoonIllumination(new Date());
+const name = names[Math.round(phase * 8) % 8];
+```
+
+(Use `phase` for the name and `fraction` for "how lit" — `fraction` peaks just under
+`1.0` even at full moon, so don't test it for exact `0` or `1`.)
 
 By subtracting `getMoonPosition().parallacticAngle` from `angle` (both in degrees)
 you get the zenith angle of the moon's bright limb (anticlockwise). The zenith
