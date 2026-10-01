@@ -101,7 +101,7 @@ test('getTimes flags polar day/night instead of returning Invalid Date', () => {
 test('getMoonTimes flags no-crossing days instead of returning a bogus time', () => {
     const polar = fx.locations.reduce((a, b) => Math.abs(b.lat) > Math.abs(a.lat) ? b : a);
     for (const date of Object.keys(fx.times[polar.name] ?? {})) {
-        const r = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), polar.lat, polar.lng);
+        const r = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), polar.lat, polar.lng, 0);
         if (r.rise === undefined && r.set === undefined) {
             assert.ok(r.alwaysUp === true || r.alwaysDown === true,
                 `expected alwaysUp/alwaysDown flag on ${date} at ${polar.name}`);
@@ -117,7 +117,7 @@ test('getMoonTimes flags no-crossing days instead of returning a bogus time', ()
 test('getMoonTimes no-crossing flag matches the actual altitude sign (issue #186)', () => {
     const lat = 78, lng = 78;
     for (const date of ['2022-01-14', '2022-01-15', '2022-01-16']) {
-        const r = SunCalc.getMoonTimes(new Date(`${date}T12:00:00Z`), lat, lng);
+        const r = SunCalc.getMoonTimes(new Date(`${date}T12:00:00Z`), lat, lng, 0);
         assert.equal(r.rise, undefined, `unexpected rise on ${date}`);
         assert.equal(r.set, undefined, `unexpected set on ${date}`);
 
@@ -144,4 +144,52 @@ test('getTimes resolves the anchored solar day at every longitude (issue #187)',
         const off = (SunCalc.getTimes(anchor, lat, lng).solarNoon - anchor) / hourMs;
         assert.ok(Math.abs(off) < 1, `lng ${lng}: solarNoon ${off.toFixed(2)} h from local solar noon`);
     }
+});
+
+// regression for #189: getMoonTimes must scan the same day getTimes resolves (the local solar day
+// containing the instant), not the UTC day, which missed Boston's 20:23 EDT moonrise on Sep 30.
+test('getMoonTimes scans the local solar day getTimes resolves (issue #189)', () => {
+    const r = SunCalc.getMoonTimes(new Date('2026-09-30T16:00:00Z'), 42.764767, -71.042023);
+    assert.ok(r.rise && Math.abs(r.rise - Date.UTC(2026, 9, 1, 0, 23)) < 60e3, `rise ${r.rise?.toISOString()}`);
+
+    const day = Date.UTC(2026, 8, 30, 12), lat = 40, hourMs = 3600e3;
+    for (const lng of [-180, -179.7, -90, -71, 0, 90, 179.9, 180]) {
+        for (const h of [-6, 0, 6]) {
+            const date = new Date(day - (lng / 15 - h) * hourMs);
+            const {nadir} = SunCalc.getTimes(date, lat, lng);
+            const m = SunCalc.getMoonTimes(date, lat, lng);
+            for (const t of [m.rise, m.set]) {
+                if (t) assert.ok(t >= nadir - 60e3 && t < nadir.valueOf() + 24 * hourMs + 60e3,
+                    `lng ${lng} h ${h}: ${t.toISOString()} outside the solar day from ${nadir.toISOString()}`);
+            }
+        }
+    }
+});
+
+// with the observer's UTC offset, both functions resolve the civil day containing the instant
+// regardless of its time-of-day, fixing the local-midnight flips of #149 and #174.
+test('utcOffset anchors getTimes and getMoonTimes to the civil day', () => {
+    const cases = [
+        // [civil date, lat, lng, utcOffset in minutes]
+        ['2020-10-09', 56, 35, 180], // #149
+        ['2022-04-14', -14.415, 128.525, 480], // #174
+        ['2026-09-30', 42.764767, -71.042023, -240], // #189
+        ['2026-08-19', 40, -179.7, -720],
+        ['2026-08-19', 40, 179.7, 720],
+        ['2026-08-19', 27.7, 85.3, 345]
+    ];
+    for (const [date, lat, lng, off] of cases) {
+        const start = Date.parse(`${date}T00:00:00Z`) - off * 60e3, end = start + 86400e3;
+        for (const ms of [start, start + 43200e3, end - 60e3]) {
+            const t = SunCalc.getTimes(new Date(ms), lat, lng, 0, off);
+            assert.ok(t.solarNoon >= start && t.solarNoon < end, `${date} ${lng}: solarNoon ${t.solarNoon.toISOString()}`);
+
+            const m = SunCalc.getMoonTimes(new Date(ms), lat, lng, off);
+            for (const e of [m.rise, m.set]) {
+                if (e) assert.ok(e >= start && e < end, `${date} ${lng}: moon event ${e.toISOString()}`);
+            }
+        }
+    }
+    const m = SunCalc.getMoonTimes(new Date('2026-09-30T00:00:00-04:00'), 42.764767, -71.042023, -240);
+    assert.ok(m.rise && m.set, 'reporter input with offset gets both rise and set');
 });

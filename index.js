@@ -1,6 +1,6 @@
 
 // shortcuts for easier to read formulas
-const {PI, sin, cos, tan, asin, atan2: atan, acos, sqrt, abs, round} = Math;
+const {PI, sin, cos, tan, asin, atan2: atan, acos, sqrt, abs, round, floor} = Math;
 const rad = PI / 180;
 
 // date/time constants and conversions
@@ -156,19 +156,29 @@ function getSetJ(h0, dt, sign, lw, phi, decT) {
     return d;
 }
 
-// calculates sun times for a given date, latitude/longitude, and, optionally,
-// the observer height (in meters) relative to the horizon
+// start of the civil day containing date in a zone utcOffset minutes ahead of UTC, as a ms timestamp
+function civilMidnight(date, utcOffset) {
+    const offMs = utcOffset * 60000;
+    return floor((date.valueOf() + offMs) / dayMs) * dayMs - offMs;
+}
 
-export function getTimes(date, lat, lng, height = 0) {
+// solar transit (days since J2000) anchoring the day shared by getTimes and getMoonTimes: the one
+// nearest the instant (the solar day containing it), or nearest civil noon when an offset is given
+function solarDayTransit(date, lw, utcOffset) {
+    const anchor = utcOffset === undefined ? date.valueOf() : civilMidnight(date, utcOffset) + dayMs / 2;
+    const lon = J0 + lw / (2 * PI);
+    return solarTransit(round(toDays(anchor) - lon) + lon, lw);
+}
+
+// calculates sun times for a given date, latitude/longitude, and, optionally, the observer height
+// (in meters) relative to the horizon and the UTC offset (in minutes) of the observer's time zone
+
+export function getTimes(date, lat, lng, height = 0, utcOffset) {
 
     const lw = rad * -lng;
     const phi = rad * lat;
     const dh = observerAngle(height);
-    // Anchor to the input date's UTC solar day regardless of its time-of-day, killing the historical
-    // "always pass noon" footgun where an early-morning Date returned the previous day's events:
-    // round to that day's noon, offset to the nearest local solar noon, then let solarTransit refine.
-    const d = round(toDays(date) - J0 - lw / (2 * PI));
-    const dt = solarTransit(d + J0 + lw / (2 * PI), lw);
+    const dt = solarDayTransit(date, lw, utcOffset);
     const dec = sunCoords(toDaysTT(dt)).dec; // declination at transit, shared by every rise/set solve
 
     const result = {
@@ -465,11 +475,12 @@ function refineMoonCross(tMs, lat, lng) {
     return tMs;
 }
 
-export function getMoonTimes(date, lat, lng) {
-    // scan the UTC calendar day of the given date; the date is treated as a UTC instant like
-    // everywhere else in the API. For a local-civil-day window, pass a date at local midnight.
-    const t = new Date(date);
-    t.setUTCHours(0, 0, 0, 0);
+export function getMoonTimes(date, lat, lng, utcOffset) {
+    // scan the same day getTimes resolves: the 24 hours from the solar nadir, or from civil midnight
+    // when the observer's UTC offset is given
+    const t = utcOffset === undefined ?
+        fromJulian(solarDayTransit(date, rad * -lng) + J2000 - 0.5) :
+        new Date(civilMidnight(date, utcOffset));
 
     let h0 = moonHeight(t, lat, lng);
     let rise, set, hMax = h0;

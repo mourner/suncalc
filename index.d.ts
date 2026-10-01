@@ -35,10 +35,11 @@ export type SunTimes = Record<SunTimeName, Date | null> & {
 };
 
 /**
- * Sun times for the input date's solar day (independent of the time-of-day passed in),
- * at the given latitude/longitude and optional observer height in meters.
+ * Sun times at the given latitude/longitude and optional observer height in meters, for the local
+ * solar day containing `date`, or for its civil day when the zone's `utcOffset` (minutes, positive
+ * east of UTC) is given.
  */
-export function getTimes(date: Date, lat: number, lng: number, height?: number): SunTimes;
+export function getTimes(date: Date, lat: number, lng: number, height?: number, utcOffset?: number): SunTimes;
 
 /** Sun-time config rows: `[altitudeAngleDeg, morningName, eveningName]`. */
 export const times: Array<[number, string, string]>;
@@ -79,5 +80,8 @@ export interface MoonTimes {
     alwaysDown?: boolean;
 }
 
-/** Moon rise/set times over the UTC calendar day of the given date. */
-export function getMoonTimes(date: Date, lat: number, lng: number): MoonTimes;
+/**
+ * Moon rise/set times over the same day `getTimes` covers: the local solar day containing `date`,
+ * or its civil day when the zone's `utcOffset` (minutes, positive east of UTC) is given.
+ */
+export function getMoonTimes(date: Date, lat: number, lng: number, utcOffset?: number): MoonTimes;

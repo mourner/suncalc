@@ -65,11 +65,12 @@ Returns an object with the following properties:
 ### Sunlight times
 
 ```javascript
-SunCalc.getTimes(date, lat, lng, height = 0)
+SunCalc.getTimes(date, lat, lng, height = 0, utcOffset)
 ```
 
-Returns sunlight times for the solar day containing `date`, at the given latitude,
+Returns sunlight times for the day containing `date`, at the given latitude,
 longitude and (optional) observer `height` above the horizon in meters.
+See [Which day](#which-day) for how the day is chosen and what `utcOffset` does.
 
 The result is an object whose properties are `Date` objects (or `null` when the
 event doesn't occur that day). Listed in the order they occur over the solar day,
@@ -196,7 +197,7 @@ angle can be used to draw the moon's shape from the observer's perspective
 ### Moon rise and set times
 
 ```js
-SunCalc.getMoonTimes(date, lat, lng)
+SunCalc.getMoonTimes(date, lat, lng, utcOffset)
 ```
 
 Returns an object with the following properties:
@@ -207,10 +208,26 @@ Returns an object with the following properties:
  * `alwaysDown`: `true` if the moon is always _below_ the horizon
 
 Unlike the sun, the moon can rise and set zero, one, or two times within a single
-day, so this function scans a fixed 24-hour window: the **UTC calendar day** of the
-given date (consistent with the rest of the API, which treats dates as UTC
-instants). If you want the window to follow an observer's local civil day, pass a
-`date` set to their local midnight.
+day. It scans the same day `getTimes` covers for the given arguments
+(see [Which day](#which-day)).
+
+### Which day
+
+`getTimes` and `getMoonTimes` return the events of one day around `date`:
+
+ * **With `utcOffset`** (recommended when you know the observer's zone): exactly the
+   local calendar day containing `date`, at any time of day. Pass minutes east of UTC,
+   e.g. `180` for UTC+3, `-240` for EDT, `0` for the UTC day, or
+   `-date.getTimezoneOffset()` for the runtime's own zone.
+ * **Without it:** the local solar day containing `date`, from one `nadir` to the next.
+   It closely follows the calendar day, but local midnight usually falls a bit before
+   solar midnight, so pass a time near local noon to be safe.
+
+```javascript
+const date = new Date('2026-09-30T00:00:00-04:00'); // midnight in Boston
+SunCalc.getTimes(date, 42.76, -71.04, 0, -240); // Sep 30
+SunCalc.getMoonTimes(date, 42.76, -71.04, -240); // Sep 30
+```
 
 ## Accuracy
 
