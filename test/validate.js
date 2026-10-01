@@ -4,7 +4,7 @@
 
 import * as SunCalc from '../index.js';
 import fx from './fixtures.json' with {type: 'json'};
-import {measure, stats, sunMap} from './compare.js';
+import {measure, stats, sunMap, moonMap} from './compare.js';
 
 const collectors = measure(SunCalc, fx);
 
@@ -26,5 +26,5 @@ table('Sun times (seconds vs USNO)', sunMap.map(([, f]) => `time.${f}`), 's', 60
 table('Moon position (deg vs JPL Horizons, refracted)', ['moon.altitude', 'moon.azimuth', 'moon.angularSep'], '°');
 table('Moon illumination fraction (vs JPL Horizons)', ['moon.fraction'], '');
 table('Moon distance (km vs JPL Horizons, geocentric)', ['moon.distance_km'], 'km');
-table('Moon times (seconds vs USNO)', ['moontime.rise', 'moontime.set'], 's', 60);
+table('Moon times (seconds vs USNO)', moonMap.map(([, f]) => `moontime.${f}`), 's', 60);
 console.log();

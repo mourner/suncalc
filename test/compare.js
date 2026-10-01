@@ -51,6 +51,9 @@ function nearestTimeDiff(SunCalc, date, lat, lng, field, truth) {
 
 const sunMap = [['Rise', 'sunrise'], ['Set', 'sunset'], ['Upper Transit', 'solarNoon'],
     ['Begin Civil Twilight', 'dawn'], ['End Civil Twilight', 'dusk']];
+// USNO lists a transit only when the moon is above the horizon at the time, so a missing truth
+// still just means skip; SunCalc reports transits regardless of visibility
+const moonMap = [['Rise', 'rise'], ['Set', 'set'], ['Upper Transit', 'transit'], ['Lower Transit', 'lowerTransit']];
 
 // Runs the whole fixture set and returns {field: [errors...]} for every measured field.
 export function measure(SunCalc, fx) {
@@ -93,7 +96,7 @@ export function measure(SunCalc, fx) {
                 record(diff !== null ? `time.${field}` : `missing.time.${field}`, diff !== null ? diff : 1);
             }
             const mt = SunCalc.getMoonTimes(new Date(`${date}T00:00:00Z`), lat, lng, 0);
-            for (const [ph, field] of [['Rise', 'rise'], ['Set', 'set']]) {
+            for (const [ph, field] of moonMap) {
                 const truth = usnoTime(date, phen(t.moondata, ph));
                 if (!truth) continue;
                 const ok = mt[field] && !isNaN(mt[field]);
@@ -105,4 +108,4 @@ export function measure(SunCalc, fx) {
     return collectors;
 }
 
-export {sunMap};
+export {sunMap, moonMap};

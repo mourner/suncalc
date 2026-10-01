@@ -74,6 +74,10 @@ export interface MoonTimes {
     rise?: Date;
     /** Moonset; absent if there's no set during the day. */
     set?: Date;
+    /** Upper meridian transit (highest point); absent on the ~1 day a month the window misses it. */
+    transit?: Date;
+    /** Lower meridian transit (lowest point); absent on the ~1 day a month the window misses it. */
+    lowerTransit?: Date;
     /** Set when the Moon stays above the horizon all day. */
     alwaysUp?: boolean;
     /** Set when the Moon stays below the horizon all day. */
@@ -81,7 +85,7 @@ export interface MoonTimes {
 }
 
 /**
- * Moon rise/set times over the same day `getTimes` covers: the local solar day containing `date`,
- * or its civil day when the zone's `utcOffset` (minutes, positive east of UTC) is given.
+ * Moon rise, set and transit times over the same day `getTimes` covers: the local solar day
+ * containing `date`, or its civil day when the zone's `utcOffset` (minutes, positive east of UTC) is given.
  */
 export function getMoonTimes(date: Date, lat: number, lng: number, utcOffset?: number): MoonTimes;

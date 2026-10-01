@@ -204,12 +204,17 @@ Returns an object with the following properties:
 
  * `rise`: moonrise time as a `Date`
  * `set`: moonset time as a `Date`
+ * `transit`: when the moon crosses the meridian at its highest point ("moon overhead")
+ * `lowerTransit`: when it crosses the meridian on the opposite side, at its lowest point
+   ("moon underfoot")
  * `alwaysUp`: `true` if the moon is always _above_ the horizon during the day
  * `alwaysDown`: `true` if the moon is always _below_ the horizon
 
 Unlike the sun, the moon can rise and set zero, one, or two times within a single
-day. It scans the same day `getTimes` covers for the given arguments
-(see [Which day](#which-day)).
+day, and since a lunar day lasts about 24 h 50 min, each transit is missing on about
+one day a month. Absent events are left out of the result. Transits are reported
+even when the moon is below the horizon. `getMoonTimes` scans the same day `getTimes`
+covers for the given arguments (see [Which day](#which-day)).
 
 ### Which day
 

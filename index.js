@@ -475,6 +475,22 @@ function refineMoonCross(tMs, lat, lng) {
     return tMs;
 }
 
+// the moon's local hour angle (radians, unwrapped) at a ms timestamp
+function moonHourAngle(t, lw) {
+    const d = toDays(t);
+    return siderealTime(d, lw) - moonCoords(toDaysTT(d)).ra;
+}
+
+// time (ms) in [t0, t0 + 1 day) when the moon's hour angle reaches H0 (0 = upper transit, PI = lower),
+// or undefined when the window misses it, about once a month since the lunar day lasts ~24.8 hours
+function moonTransit(t0, lw, H0) {
+    const rate = 2 * PI * 0.96614 / dayMs; // mean hour angle rate (347.8° per day) in radians per ms
+    const a = H0 - moonHourAngle(t0, lw);
+    let t = t0 + (a - 2 * PI * floor(a / (2 * PI))) / rate; // first crossing after t0 at the mean rate
+    for (let i = 0; i < 2; i++) t -= wrapPi(moonHourAngle(t, lw) - H0) / rate;
+    return t < t0 + dayMs ? t : undefined;
+}
+
 export function getMoonTimes(date, lat, lng, utcOffset) {
     // scan the same day getTimes resolves: the 24 hours from the solar nadir, or from civil midnight
     // when the observer's UTC offset is given
@@ -526,6 +542,13 @@ export function getMoonTimes(date, lat, lng, utcOffset) {
     // event whose numeric value is 0, which a truthy check would wrongly treat as "no event".
     if (rise !== undefined) result.rise = new Date(refineMoonCross(hoursLater(t, rise).valueOf(), lat, lng));
     if (set !== undefined) result.set = new Date(refineMoonCross(hoursLater(t, set).valueOf(), lat, lng));
+
+    // meridian crossings, reported whether or not the moon is above the horizon at the time
+    const lw = rad * -lng;
+    const transit = moonTransit(t.valueOf(), lw, 0);
+    const lowerTransit = moonTransit(t.valueOf(), lw, PI);
+    if (transit !== undefined) result.transit = new Date(transit);
+    if (lowerTransit !== undefined) result.lowerTransit = new Date(lowerTransit);
 
     // no crossing all day: flag which side the moon stays on by testing its highest sampled height
     // against the rise/set threshold (already baked into moonHeight), setting both like getTimes does
