@@ -13,6 +13,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as SunCalc from '../index.js';
 import fx from './fixtures.json' with {type: 'json'};
+import moonPhases from './moon-phases.json' with {type: 'json'};
 import {measure, stats} from './compare.js';
 
 const collectors = measure(SunCalc, fx);
@@ -216,4 +217,24 @@ test('getMoonTimes reports each moon transit exactly once across consecutive day
             assert.ok(skipped === 2, `${lat},${lng} ${field}: ${skipped} days without one in 60`);
         }
     }
+});
+
+test('getMoonIllumination phase crosses the named values at the USNO phase instants (issue #190)', () => {
+    let sum = 0, max = 0;
+    for (const [iso, target] of moonPhases) {
+        const t = Date.parse(iso);
+        // bisect the instant phase passes target within ±12 h; signed offset wraps across 0/1
+        const past = ms => (SunCalc.getMoonIllumination(new Date(ms)).phase - target + 1.5) % 1 - 0.5;
+        let a = t - 12 * 3600e3, b = t + 12 * 3600e3;
+        while (b - a > 1e3) {
+            const m = (a + b) / 2;
+            if (past(m) < 0) a = m; else b = m;
+        }
+        const err = Math.abs(b - t) / 60e3;
+        sum += err;
+        max = Math.max(max, err);
+    }
+    // USNO times are rounded to the minute, so ~0.5 min mean is the floor
+    assert.ok(sum / moonPhases.length < 1, `mean ${(sum / moonPhases.length).toFixed(2)} min`);
+    assert.ok(max < 2, `max ${max.toFixed(2)} min`);
 });

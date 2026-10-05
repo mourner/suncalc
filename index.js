@@ -77,7 +77,8 @@ function sunCoords(d) {
 
     return {
         ra: atan(cos(e) * sin(L), cos(L)), // 25.6
-        dec: asin(sin(e) * sin(L))         // 25.7
+        dec: asin(sin(e) * sin(L)),        // 25.7
+        lon: L
     };
 }
 
@@ -396,7 +397,8 @@ function moonCoords(d) {
     return {
         ra: atan(sin(l) * cos(eps) - tan(b) * sin(eps), cos(l)),  // 13.3
         dec: asin(sin(b) * cos(eps) + cos(b) * sin(eps) * sin(l)), // 13.4
-        dist: 385000.56 + sr / 1000  // distance to the Moon in km
+        dist: 385000.56 + sr / 1000, // distance to the Moon in km
+        lon: l
     };
 }
 
@@ -435,14 +437,17 @@ export function getMoonIllumination(date = new Date()) {
     const angle = atan(cos(s.dec) * sin(s.ra - m.ra), sin(s.dec) * cos(m.dec) -
         cos(s.dec) * sin(m.dec) * cos(s.ra - m.ra));
 
-    const waxing = angle < 0; // bright limb leads → illuminated fraction is growing (new → full)
+    // elongation in ecliptic longitude, which defines the named phases (Meeus ch. 49, USNO); the RA
+    // difference behind `angle` crosses 0/180° hours off conjunction/opposition near the nodes
+    const phase = (((m.lon - s.lon) / (2 * PI)) % 1 + 1) % 1;
+    const waxing = phase < 0.5;
 
     return {
         // illuminated fraction, 0 (new) → 1 (full); reaches the exact extrema only at perfect
         // syzygy (eclipses), so a "full" moon typically peaks a hair under 1 — this is correct
         fraction: (1 + cos(inc)) / 2,
         // phase, 0 → 1: 0 new, 0.25 first quarter, 0.5 full, 0.75 last quarter (waxing for phase < 0.5)
-        phase: 0.5 + 0.5 * inc * (waxing ? -1 : 1) / PI,
+        phase,
         // position angle of the bright limb, degrees (v2: all angles emitted in degrees) — subtract
         // getMoonPosition().parallacticAngle, also degrees, to get the zenith-relative tilt
         angle: angle / rad,
