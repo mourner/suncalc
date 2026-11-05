@@ -32,9 +32,9 @@
   "unpkg": "./suncalc.cjs",
   "jsdelivr": "./suncalc.cjs",
   "devDependencies": {
-    "eslint": "^10.9.1",
-    "eslint-config-mourner": "^5.0.1",
-    "rolldown": "^1.2.6"
+    "eslint": "^10.14.0",
+    "eslint-config-mourner": "^5.0.2",
+    "rolldown": "^1.2.16"
   },
   "files": [
     "index.js",
