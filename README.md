@@ -11,7 +11,7 @@ Calculations are based on the formulas from Jean Meeus' *Astronomical Algorithms
 You can read about different twilight phases calculated by SunCalc
 in the [Twilight article on Wikipedia](http://en.wikipedia.org/wiki/Twilight).
 
-[![Build Status](https://github.com/mourner/suncalc/actions/workflows/test.yml/badge.svg)](https://github.com/mourner/suncalc/actions) [![Simply Awesome](https://img.shields.io/badge/simply-awesome-brightgreen.svg)](https://github.com/mourner/projects)
+[![Build Status](https://github.com/mourner/suncalc/actions/workflows/test.yml/badge.svg)](https://github.com/mourner/suncalc/actions) [![min+gzip](https://img.shields.io/bundlejs/size/suncalc?label=min%2Bgzip)](https://www.jsdelivr.com/package/npm/suncalc) [![Simply Awesome](https://img.shields.io/badge/simply-awesome-brightgreen.svg)](https://github.com/mourner/projects)
 
 ## Example
 
