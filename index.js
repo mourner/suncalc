@@ -139,22 +139,36 @@ function solarTransit(dt, lw) {
     return dt;
 }
 
-// time the Sun reaches altitude h0 on the given side of transit (sign -1 = rise, +1 = set);
-// starts from the hour angle at transit and converges with Meeus' altitude correction (15.2).
-function getSetJ(h0, dt, sign, lw, phi, decT) {
-    const cosH0 = (sin(h0) - sin(phi) * sin(decT)) / (cos(phi) * cos(decT));
-    if (cosH0 < -1 || cosH0 > 1) return NaN; // sun stays above / below this altitude all day
+// time the Sun reaches altitude h0 within the half day [a, b] between transit and nadir, given the
+// sine of its altitude at both ends; NaN if it doesn't cross h0 there (altitude is monotonic over the
+// half day, so a sign change means exactly one crossing). Seeds from the hour angle at transit
+// declination, then Newton on sin(h) kept inside a shrinking bracket, bisecting whenever a step
+// leaves it — on near-grazing days the slope is tiny and plain Newton steps land days away.
+function getSetJ(h0, a, b, sa, sb, dt, lw, phi, decT) {
+    const s0 = sin(h0);
+    const rising = sa < sb;
+    if ((sa - s0) * (sb - s0) > 0) return NaN; // sun stays above / below this altitude all half day
 
-    let d = dt + sign * acos(cosH0) / (2 * PI);
-    for (let i = 0; i < 2; i++) {
+    const cosH0 = (s0 - sin(phi) * sin(decT)) / (cos(phi) * cos(decT));
+    const H0 = cosH0 <= -1 ? PI : cosH0 >= 1 ? 0 : acos(cosH0);
+    let d = dt + (rising ? -H0 : H0) / (2 * PI);
+
+    for (;;) {
         const c = sunCoords(toDaysTT(d));
-        const H = wrapPi(siderealTime(d, lw) - c.ra);
-        const h = altitude(H, phi, c.dec);
-        const sinH = cos(phi) * cos(c.dec) * sin(H);
-        if (abs(sinH) < 1e-6) break; // grazing the horizon — correction is ill-conditioned
-        d += (h - h0) / (2 * PI * sinH);
+        const H = siderealTime(d, lw) - c.ra;
+        const k = cos(phi) * cos(c.dec);
+        const f = sin(phi) * sin(c.dec) + k * cos(H) - s0;
+        if ((f < 0) === rising) a = d; else b = d;
+
+        const step = f / (2 * PI * k * sin(H));
+        if (d + step > a && d + step < b) {
+            d += step;
+            if (abs(step) < 1e-5) return d; // ~1 s step, so quadratic convergence leaves ~µs error
+        } else {
+            d = (a + b) / 2;
+            if (b - a < 1e-8) return d;
+        }
     }
-    return d;
 }
 
 // start of the civil day containing date in a zone utcOffset minutes ahead of UTC, as a ms timestamp
@@ -182,6 +196,12 @@ export function getTimes(date, lat, lng, height = 0, utcOffset) {
     const dt = solarDayTransit(date, lw, utcOffset);
     const dec = sunCoords(toDaysTT(dt)).dec; // declination at transit, shared by every rise/set solve
 
+    // sine of the Sun's altitude at transit and at the nadirs either side (H = 0 and π), bracketing
+    // every rise and set; the nadirs use their own declination, which matters on regime-boundary days
+    const sNoon = cos(phi - dec);
+    const sNadir1 = -cos(phi + sunCoords(toDaysTT(dt - 0.5)).dec);
+    const sNadir2 = -cos(phi + sunCoords(toDaysTT(dt + 0.5)).dec);
+
     const result = {
         solarNoon: fromJulian(dt + J2000),
         nadir: fromJulian(dt + J2000 - 0.5)
@@ -189,8 +209,8 @@ export function getTimes(date, lat, lng, height = 0, utcOffset) {
 
     for (const [angle, riseName, setName] of times) {
         const h0 = (angle + dh) * rad;
-        const jrise = getSetJ(h0, dt, -1, lw, phi, dec);
-        const jset = getSetJ(h0, dt, 1, lw, phi, dec);
+        const jrise = getSetJ(h0, dt - 0.5, dt, sNadir1, sNoon, dt, lw, phi, dec);
+        const jset = getSetJ(h0, dt, dt + 0.5, sNoon, sNadir2, dt, lw, phi, dec);
 
         // a NaN means the Sun never reaches this altitude on this day — report null, not Invalid Date
         result[riseName] = Number.isNaN(jrise) ? null : fromJulian(jrise + J2000);

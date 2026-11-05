@@ -171,6 +171,46 @@ test('getMoonTimes scans the local solar day getTimes resolves (issue #189)', ()
     }
 });
 
+// on days the Sun barely reaches an altitude, each event lands on its line within its half day or is
+// null — never thrown hours or days away by an ill-conditioned step; Horizons times (issue #191).
+test('getTimes resolves grazing events or reports them absent (issue #191)', () => {
+    const cases = [
+        // [date, lat, lng, field, expected UTC time or null]
+        ['2026-05-22', 51.5074, -0.1278, 'night', null],
+        ['2026-05-22', 51.5074, -0.1278, 'nightEnd', '2026-05-22T00:18:06Z'],
+        ['2027-07-26', 52.52, 13.405, 'nightEnd', null],
+        ['2027-07-26', 52.52, 13.405, 'night', '2027-07-26T22:50:31Z'],
+        ['2026-08-14', 69.6496, 18.956, 'dawn', null],
+        ['2026-08-14', 69.6496, 18.956, 'dusk', '2026-08-14T22:14:03Z'],
+        ['2026-05-18', 69.6496, 18.956, 'sunrise', '2026-05-17T22:52:02Z'],
+        ['2026-07-25', 69.6496, 18.956, 'sunset', '2026-07-25T22:37:09Z'],
+        ['2026-04-18', 67, 18.956, 'nauticalDusk', null]
+    ];
+    for (const [day, lat, lng, field, expected] of cases) {
+        const t = SunCalc.getTimes(new Date(`${day}T12:00:00Z`), lat, lng)[field];
+        if (expected === null) assert.equal(t, null, `${day} ${field}: ${t?.toISOString()}`);
+        else assert.ok(t && Math.abs(t - new Date(expected)) < 60e3, `${day} ${field}: ${t?.toISOString()}`);
+    }
+
+    for (let lat = 48; lat <= 72; lat += 0.5) {
+        for (let day = 0; day < 365; day += 3) {
+            const r = SunCalc.getTimes(new Date(Date.UTC(2026, 0, 1 + day, 12)), lat, 10);
+            for (const [angle, riseName, setName] of SunCalc.times) {
+                for (const name of [riseName, setName]) {
+                    const t = r[name];
+                    if (!t) continue;
+                    const dt = (t - r.solarNoon) * (name === riseName ? -1 : 1);
+                    assert.ok(dt >= 0 && dt <= 43200e3, `${lat} ${day} ${name} outside its half day`);
+                    if (angle < -1) { // below the horizon, getPosition adds a constant ~0.484° refraction
+                        const alt = SunCalc.getPosition(t, lat, 10).altitude - 0.484;
+                        assert.ok(Math.abs(alt - angle) < 0.01, `${lat} ${day} ${name} at ${alt}°`);
+                    }
+                }
+            }
+        }
+    }
+});
+
 // with the observer's UTC offset, both functions resolve the civil day containing the instant
 // regardless of its time-of-day, fixing the local-midnight flips of #149 and #174.
 test('utcOffset anchors getTimes and getMoonTimes to the civil day', () => {
