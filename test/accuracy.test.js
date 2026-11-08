@@ -90,7 +90,7 @@ test('getTimes flags polar day/night instead of returning Invalid Date', () => {
                     assert.ok(r[f] === null || r[f] === undefined || !isNaN(r[f]), `${f} unusable at ${loc.name} ${date}`);
                 }
             }
-            if (r.sunrise === null) {
+            if (r.sunrise === null && r.sunset === null) {
                 sawPolar = true;
                 assert.equal(r.alwaysUp === true ? 1 : 0, r.alwaysDown === true ? 0 : 1,
                     `expected exactly one of alwaysUp/alwaysDown at ${loc.name} ${date}`);
@@ -237,6 +237,28 @@ test('utcOffset anchors getTimes and getMoonTimes to the civil day', () => {
     }
     const m = SunCalc.getMoonTimes(new Date('2026-09-30T00:00:00-04:00'), 42.764767, -71.042023, -240);
     assert.ok(m.rise && m.set, 'reporter input with offset gets both rise and set');
+});
+
+// with an offset, events between civil midnight and the solar nadir come from the neighbouring solar
+// day instead of being swapped for the next day's ones (issue #192)
+test('getTimes with utcOffset reports only events inside the civil day (issue #192)', () => {
+    const cases = [
+        // [civil date, lat, lng, utcOffset, field, expected UTC time or null]
+        ['2026-06-01', 42.2406, -8.7207, 120, 'night', '2026-05-31T22:11:55Z'],
+        ['2026-06-21', 39.4704, 75.9898, 480, 'night', '2026-06-20T16:27:38Z'],
+        ['2026-07-25', 69.6492, 18.9553, 120, 'sunset', null]
+    ];
+    for (const [date, lat, lng, off, field, expected] of cases) {
+        const start = Date.parse(`${date}T00:00:00Z`) - off * 60e3;
+        for (const ms of [start, start + 43200e3, start + 86400e3 - 1]) {
+            const r = SunCalc.getTimes(new Date(ms), lat, lng, 0, off);
+            const t = r[field];
+            if (expected === null) {
+                assert.equal(t, null, `${date} ${field}: ${t?.toISOString()}`);
+                assert.equal(r.alwaysUp, true, `${date}: expected alwaysUp`);
+            } else assert.ok(t && Math.abs(t - new Date(expected)) < 60e3, `${date} ${field}: ${t?.toISOString()}`);
+        }
+    }
 });
 
 // consecutive daily windows must report every meridian crossing exactly once: transits ~24.8 h apart,

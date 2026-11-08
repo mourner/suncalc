@@ -228,6 +228,11 @@ covers for the given arguments (see [Which day](#which-day)).
    It closely follows the calendar day, but local midnight usually falls a bit before
    solar midnight, so pass a time near local noon to be safe.
 
+Rarely, a sun event happens twice in one calendar day, e.g. at 00:05 and again at 23:58,
+because it shifts by more than a minute a day. This happens mostly above 60° latitude and
+for twilight around the solstices. `getTimes` then returns the one belonging to the solar
+day of that date's solar noon.
+
 ```javascript
 const date = new Date('2026-09-30T00:00:00-04:00'); // midnight in Boston
 SunCalc.getTimes(date, 42.76, -71.04, 0, -240); // Sep 30

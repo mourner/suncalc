@@ -202,24 +202,39 @@ export function getTimes(date, lat, lng, height = 0, utcOffset) {
     const sNadir1 = -cos(phi + sunCoords(toDaysTT(dt - 0.5)).dec);
     const sNadir2 = -cos(phi + sunCoords(toDaysTT(dt + 0.5)).dec);
 
+    // the window is the solar day [dt - 0.5, dt + 0.5), or with an offset the civil day, which is just as
+    // long but shifted by up to half a day: it then also takes in the evening of the previous solar day
+    // or the morning of the next one, where events cut off from this solar day are looked up instead
+    const start = utcOffset === undefined ? dt - 0.5 : toDays(civilMidnight(date, utcOffset));
+    const end = start + 1;
+    const prev = start < dt - 0.5;
+    const next = end > dt + 0.5;
+    const dt2 = prev ? solarTransit(dt - 1, lw) : next ? solarTransit(dt + 1, lw) : dt;
+    const dec2 = dt2 === dt ? dec : sunCoords(toDaysTT(dt2)).dec;
+    const sNoon2 = cos(phi - dec2);
+
+    // solar days run up to ~30 s longer than 24 h, so a civil day can miss a nadir by seconds; keep
+    // this solar day's one then
     const result = {
         solarNoon: fromJulian(dt + J2000),
-        nadir: fromJulian(dt + J2000 - 0.5)
+        nadir: fromJulian((next && dt2 - 0.5 < end ? dt2 : dt) - 0.5 + J2000)
     };
 
     for (const [angle, riseName, setName] of times) {
         const h0 = (angle + dh) * rad;
-        const jrise = getSetJ(h0, dt - 0.5, dt, sNadir1, sNoon, dt, lw, phi, dec);
-        const jset = getSetJ(h0, dt, dt + 0.5, sNoon, sNadir2, dt, lw, phi, dec);
+        let jrise = getSetJ(h0, dt - 0.5, dt, sNadir1, sNoon, dt, lw, phi, dec);
+        let jset = getSetJ(h0, dt, dt + 0.5, sNoon, sNadir2, dt, lw, phi, dec);
+        if (next && !(jrise >= start)) jrise = getSetJ(h0, dt + 0.5, dt2, sNadir2, sNoon2, dt2, lw, phi, dec2);
+        if (prev && !(jset < end)) jset = getSetJ(h0, dt2, dt - 0.5, sNoon2, sNadir1, dt2, lw, phi, dec2);
 
-        // a NaN means the Sun never reaches this altitude on this day — report null, not Invalid Date
-        result[riseName] = Number.isNaN(jrise) ? null : fromJulian(jrise + J2000);
-        result[setName] = Number.isNaN(jset) ? null : fromJulian(jset + J2000);
+        // NaN (the Sun never reaches this altitude) or outside the window: report null, not Invalid Date
+        result[riseName] = jrise >= start && jrise < end ? fromJulian(jrise + J2000) : null;
+        result[setName] = jset >= start && jset < end ? fromJulian(jset + J2000) : null;
     }
 
     // polar day/night: when the Sun never crosses the standard rise/set altitude, flag which side it
     // stays on by comparing its altitude at solar noon (its daily maximum) against that threshold.
-    if (result.sunrise === null) {
+    if (result.sunrise === null && result.sunset === null) {
         const noonAlt = altitude(0, phi, dec);
         const riseSetAlt = (times[0][0] + dh) * rad;
         result.alwaysUp = noonAlt > riseSetAlt;
