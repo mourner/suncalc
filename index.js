@@ -142,16 +142,18 @@ function solarTransit(dt, lw) {
 // time the Sun reaches altitude h0 within the half day [a, b] between transit and nadir, given the
 // sine of its altitude at both ends; NaN if it doesn't cross h0 there (altitude is monotonic over the
 // half day, so a sign change means exactly one crossing). Seeds from the hour angle at transit
-// declination, then Newton on sin(h) kept inside a shrinking bracket, bisecting whenever a step
-// leaves it — on near-grazing days the slope is tiny and plain Newton steps land days away.
+// declination, then Newton on sin(h) kept inside a shrinking bracket, bisecting whenever a step leaves
+// it or fails to halve the previous step (as in rtsafe) — on near-grazing days the slope is tiny, so
+// plain Newton steps land days away or ping-pong inside the bracket, barely shrinking it.
 function getSetJ(h0, a, b, sa, sb, dt, lw, phi, decT) {
     const s0 = sin(h0);
     const rising = sa < sb;
-    if ((sa - s0) * (sb - s0) > 0) return NaN; // sun stays above / below this altitude all half day
+    if (!((sa - s0) * (sb - s0) <= 0)) return NaN; // stays above / below h0 all half day, or NaN input
 
     const cosH0 = (s0 - sin(phi) * sin(decT)) / (cos(phi) * cos(decT));
     const H0 = cosH0 <= -1 ? PI : cosH0 >= 1 ? 0 : acos(cosH0);
     let d = dt + (rising ? -H0 : H0) / (2 * PI);
+    let dx = b - a;
 
     for (;;) {
         const c = sunCoords(toDaysTT(d));
@@ -161,11 +163,13 @@ function getSetJ(h0, a, b, sa, sb, dt, lw, phi, decT) {
         if ((f < 0) === rising) a = d; else b = d;
 
         const step = f / (2 * PI * k * sin(H));
-        if (d + step > a && d + step < b) {
+        if (d + step > a && d + step < b && abs(step) <= abs(dx) / 2) {
+            dx = step;
             d += step;
             if (abs(step) < 1e-5) return d; // ~1 s step, so quadratic convergence leaves ~µs error
         } else {
-            d = (a + b) / 2;
+            dx = (b - a) / 2;
+            d = a + dx;
             if (b - a < 1e-8) return d;
         }
     }

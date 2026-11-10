@@ -261,6 +261,21 @@ test('getTimes with utcOffset reports only events inside the civil day (issue #1
     }
 });
 
+test('getTimes returns null events for NaN or infinite inputs instead of hanging (issue #193)', () => {
+    const date = new Date('2026-08-28T12:00:00Z');
+    const cases = [
+        [date, NaN, NaN], [date, NaN, 10], [date, 48.85, NaN], [new Date('x'), 48.85, 2.35],
+        [date, undefined, undefined], [date, 48.85, 2.35, NaN], [date, 48.85, 2.35, 0, NaN], [date, Infinity, 2.35]
+    ];
+    for (const args of cases) {
+        const r = SunCalc.getTimes(...args);
+        for (const [, riseName, setName] of SunCalc.times) {
+            assert.equal(r[riseName], null, `${args.slice(1)} ${riseName}`);
+            assert.equal(r[setName], null, `${args.slice(1)} ${setName}`);
+        }
+    }
+});
+
 // consecutive daily windows must report every meridian crossing exactly once: transits ~24.8 h apart,
 // so each kind skips about one day a month, and they're reported even when the moon stays down
 test('getMoonTimes reports each moon transit exactly once across consecutive days', () => {
