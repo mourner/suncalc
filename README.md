@@ -143,6 +143,10 @@ Returns an object with the following properties:
  * `azimuth`: moon azimuth in degrees, clockwise from north
  * `distance`: distance to the moon in kilometers
  * `parallacticAngle`: parallactic angle of the moon in degrees
+ * `ra` gives the moon's apparent geocentric right ascension in degrees (0 ≤ `ra` < 360)
+ * `dec` gives the moon's apparent geocentric declination in degrees (−90 to +90)
+
+Both equatorial coordinates use the equator and equinox of the observation date.
 
 ### Moon illumination
 

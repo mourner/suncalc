@@ -461,7 +461,9 @@ export function getMoonPosition(date, lat, lng) {
         // apparent (refraction-corrected) altitude in degrees
         altitude: (h + astroRefraction(h)) / rad,
         distance: c.dist,
-        parallacticAngle: pa / rad
+        parallacticAngle: pa / rad,
+        ra: (c.ra / rad + 360) % 360,
+        dec: c.dec / rad
     };
 }
 

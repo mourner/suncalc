@@ -68,6 +68,21 @@ for (const [field, tol] of Object.entries(TOLERANCE)) {
     });
 }
 
+test('getMoonPosition returns geocentric right ascension and declination in degrees', () => {
+    // JPL DE421, apparent geocentric RA/Dec of date at 00:00 UTC (Skyfield).
+    for (const [day, expectedRa, expectedDec] of [
+        ['2026-01-01', 63.9203, 26.4037],
+        ['2026-01-16', 263.2920, -28.2716]
+    ]) {
+        const date = new Date(`${day}T00:00:00Z`);
+        for (const [lat, lng] of [[0, 0], [50, 30]]) {
+            const {ra, dec} = SunCalc.getMoonPosition(date, lat, lng);
+            assert.ok(Math.abs(ra - expectedRa) < 0.01, `${day}: RA ${ra}°`);
+            assert.ok(Math.abs(dec - expectedDec) < 0.01, `${day}: Dec ${dec}°`);
+        }
+    }
+});
+
 // No silently-dropped samples: compare.js records a `missing.*` entry whenever external truth has an
 // event but SunCalc returns no usable time. Any such entry is a regression (a dropped comparison that
 // would otherwise lower the count without failing a tolerance), so the suite must see zero of them.

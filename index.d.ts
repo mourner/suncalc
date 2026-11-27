@@ -52,6 +52,10 @@ export interface MoonPosition extends Position {
     distance: number;
     /** Parallactic angle, degrees. */
     parallacticAngle: number;
+    /** Apparent geocentric right ascension of date in degrees, from 0 up to 360 (exclusive). */
+    ra: number;
+    /** Apparent geocentric declination of date in degrees. */
+    dec: number;
 }
 
 export function getMoonPosition(date: Date, lat: number, lng: number): MoonPosition;
